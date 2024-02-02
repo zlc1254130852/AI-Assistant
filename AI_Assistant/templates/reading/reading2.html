@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Title</title>
+    <style>
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+
+    ::-webkit-scrollbar-track {
+      background-color: #f1f1f1;
+    }
+
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #6698FF;
+    }
+
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #6698FF;
+    }
+    </style>
+    <link rel="stylesheet" href="../static/plugins/bootstrap_v3/css/bootstrap.min.css">
+		<script src="../static/plugins/bootstrap_v3/js/jquery-3.7.1.min.js"></script>
+		<script src="../static/plugins/bootstrap_v3/js/bootstrap.min.js"></script>
+        <script>
+        var show_time=1;
+        var pause=0
+        const choices=['A','B','C','D','E','F','G']
+        var second;
+        var minute;
+        var oDiv;
+        var answers;
+        var answers_tmp=["-1","-1","-1","-1","-1","-1","-1","-1","-1","-1","-1","-1","-1"]
+        var user=""
+
+        window.onload=function ()
+        {
+            if(document.getElementById("current_user"))
+            	user=document.getElementById("current_user").innerHTML
+            if(user==""){
+            	window.location.href = "/chat"
+				alert("Please log in to proceed");
+				return;
+			}
+            $.ajax({
+					url: "/load",
+					type: "POST",
+					data: {
+					    current_user:user,
+						practice_name: "reading2",
+					},
+					dataType: "json",
+					success: function(response) {
+						if (response.code!=-1)
+						{
+						    for(i=0;i<5;i++){
+						        let sel=0
+                                for (j=0;j<7;j++)
+                                {
+                                    if (response.record_info[i]==choices[j])
+                                    {
+                                        sel=j+1
+                                        break
+                                    }
+                                }
+                                if (sel!=0)
+                                    document.getElementById((i+14).toString()+"_"+sel.toString()).innerHTML="&nbsp;&nbsp;√"
+						    }
+
+
+						    for(i=19;i<23;i++){
+								if (response.record_info[i-14]!="-1")
+								{
+									document.getElementById("blank"+i.toString()).value=response.record_info[i-14]
+								}
+							}
+
+                            var cks = document.getElementsByName("option23");
+
+                            i=9
+
+                            for(var j = 0; j < cks.length; j++){
+                                var ck = cks[j];
+                                if(ck.value==response.record_info[i]){
+                                    console.log(choices[j]);
+                                    ck.checked=true
+                                    i+=1
+                                    if(i==11)
+                                        break
+                                }
+                            }
+
+                            cks = document.getElementsByName("option25");
+
+                            i=11
+
+                            for(var j = 0; j < cks.length; j++){
+                                var ck = cks[j];
+                                if(ck.value==response.record_info[i]){
+                                    console.log(choices[j]);
+                                    ck.checked=true
+                                    i+=1
+                                }
+                            }
+						}
+
+					}
+				});
+
+            oDiv=document.getElementById('timer');
+            second=1;
+            minute=0;
+            setInterval(function(){
+                if (pause==0)
+                if (show_time==1){
+                    if (second<=9 && minute<=9){
+                         oDiv.innerHTML="0"+minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (second<=9){
+                        oDiv.innerHTML=minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (minute<=9){
+                        oDiv.innerHTML="0"+minute.toString()+":"+second.toString();
+                    }
+                    else{
+                        oDiv.innerHTML=minute.toString()+":"+second.toString();
+                    }
+                }
+                else{
+                    oDiv.innerHTML="show timer"
+                }
+
+                if (pause==0)
+                    second++;
+
+                if(second==60){
+
+                    second=0;
+                    minute++;
+
+                }
+                if(minute==60){
+                    minute=0;
+                }
+
+            },1000);
+            var cks = document.getElementsByName("option23");
+                for(var i = 0; i < cks.length; i++){
+                    cks[i].onclick = function(){
+                        if(!this.checked) return;
+                        var sum = 0;
+                        for(var j = 0; j < cks.length; j++){
+                            var ck = cks[j];
+                            if(ck.checked){
+                                sum++;
+                            }
+                        }
+                        if(sum > 2){
+                            this.checked = false;
+                        }
+                    }
+                }
+            var cks1 = document.getElementsByName("option25");
+                for(var i = 0; i < cks1.length; i++){
+                    cks1[i].onclick = function(){
+                        if(!this.checked) return;
+                        var sum = 0;
+                        for(var j = 0; j < cks1.length; j++){
+                            var ck = cks1[j];
+                            if(ck.checked){
+                                sum++;
+                            }
+                        }
+                        if(sum > 2){
+                            this.checked = false;
+                        }
+                    }
+                }
+
+        };
+            var answer=["-1","-1","-1","-1","-1"]
+            function onSave(){
+
+                for(i=0;i<5;i++){
+                    answers_tmp[i]=answer[i]
+                }
+
+				for(i=19;i<23;i++){
+					console.log(document.getElementById("blank"+i.toString()).value)
+					if (document.getElementById("blank"+i.toString()).value.trim()!="")
+					{
+						answers_tmp[i-14]=document.getElementById("blank"+i.toString()).value.trim()
+					}
+				}
+				var cks = document.getElementsByName("option23");
+
+                i=9
+
+                for(var j = 0; j < cks.length; j++){
+                    var ck = cks[j];
+                    if(ck.checked){
+                        console.log(choices[j]);
+
+                        answers_tmp[i]=choices[j]
+                        i+=1
+                    }
+                }
+                cks = document.getElementsByName("option25");
+
+                i=11
+
+                for(var j = 0; j < cks.length; j++){
+                    var ck = cks[j];
+                    if(ck.checked){
+                        console.log(choices[j]);
+
+                        answers_tmp[i]=choices[j]
+                        i+=1
+                    }
+                }
+				$.ajax({
+					url: "/save",
+					type: "POST",
+					data: {
+					    current_user:user,
+						practice_name: "reading2",
+						answers_to_save: JSON.stringify(answers_tmp)
+					},
+					dataType: "json",
+					success: function(response) {
+						alert("Answers saved successfully");
+					}
+				});
+			}
+            function onSubmit(){
+                $.ajax({
+                    type: 'GET',
+                    url: '/submit/reading2',
+                    data: {
+                    },
+                    success: function (res) {
+                        console.log(res);
+                        answers=res
+                        for(i=0;i<5;i++){
+                            console.log(answer[i]);
+
+                            if(answers[i]!=answer[i]){
+                                for (j=1;j<8;j++){
+                                    if(document.getElementById((i+14).toString()+"_"+j.toString()).innerHTML=="&nbsp;&nbsp;√")
+                                    {
+                                        document.getElementById((i+14).toString()+"_"+j.toString()).style.color="red"
+                                    }
+                                }
+                            }
+
+                            let sel=0
+                            for (j=0;j<7;j++)
+                            {
+                                if (answers[i]==choices[j])
+                                {
+                                    sel=j+1
+                                    break
+                                }
+                            }
+                            document.getElementById((i+14).toString()+"_"+sel.toString()).style.color="green"
+                            document.getElementById((i+14).toString()+"_"+sel.toString()).innerHTML="&nbsp;&nbsp;√"
+                        }
+                        for(i=19;i<23;i++){
+                            console.log(document.getElementById("blank"+i.toString()).value)
+                            if (document.getElementById("blank"+i.toString()).value.trim()!=answers[i-14])
+                            {
+                                document.getElementById("blank"+i.toString()).style.color="red"
+                                document.getElementById("answer"+i.toString()).style.color="green"
+                                document.getElementById("answer"+i.toString()).innerHTML=answers[i-14]
+                            }
+                            else{
+                                document.getElementById("blank"+i.toString()).style.color="green"
+                                document.getElementById("answer"+i.toString()).innerHTML=""
+                            }
+                        }
+
+                        var cks = document.getElementsByName("option23");
+
+        <!--                        for(var j = 0; j < cks.length; j++){-->
+        <!--                            var ck = cks[j];-->
+        <!--                            if(ck.checked){-->
+        <!--                                console.log(choices[j]);-->
+        <!--                            }-->
+        <!--                        }-->
+                                for(var j = 0; j < cks.length; j++){
+                                    if (cks[j].value==answers[9]||cks[j].value==answers[10])
+                                    {
+                                        document.getElementById("opt23"+"_"+(j+1).toString()).style.color="green";
+                                    }
+                                    else{
+                                        document.getElementById("opt23"+"_"+(j+1).toString()).style.color="black";
+                                    }
+                                    var ck = cks[j];
+                                    if(ck.checked){
+                                        console.log(choices[j]);
+                                        if (!(cks[j].value==answers[9]||cks[j].value==answers[10]))
+                                        {
+                                            document.getElementById("opt23"+"_"+(j+1).toString()).style.color="red";
+                                        }
+                                    }
+                                }
+                        cks = document.getElementsByName("option25");
+
+        <!--                        for(var j = 0; j < cks.length; j++){-->
+        <!--                            var ck = cks[j];-->
+        <!--                            if(ck.checked){-->
+        <!--                                console.log(choices[j]);-->
+        <!--                            }-->
+        <!--                        }-->
+                                    for(var j = 0; j < cks.length; j++){
+                                        if (cks[j].value==answers[11]||cks[j].value==answers[12])
+                                        {
+                                            document.getElementById("opt25"+"_"+(j+1).toString()).style.color="green";
+                                        }
+                                        else{
+                                            document.getElementById("opt25"+"_"+(j+1).toString()).style.color="black";
+                                        }
+                                        var ck = cks[j];
+                                        if(ck.checked){
+                                            console.log(choices[j]);
+                                            if (!(cks[j].value==answers[11]||cks[j].value==answers[12]))
+                                            {
+                                                document.getElementById("opt25"+"_"+(j+1).toString()).style.color="red";
+                                            }
+                                        }
+                                    }
+                            }})
+            }
+            function set_dike(que,sel){
+                for(i=1;i<8;i++){
+                    document.getElementById(que.toString()+"_"+i.toString()).innerHTML=""
+                }
+                document.getElementById(que.toString()+"_"+sel.toString()).innerHTML="&nbsp;&nbsp;√"
+                answer[que-14]=choices[sel-1]
+            }
+            function switchTimer(){
+                if (show_time==0){
+                    show_time=1
+                    if (second<=9 && minute<=9){
+                         oDiv.innerHTML="0"+minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (second<=9){
+                        oDiv.innerHTML=minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (minute<=9){
+                        oDiv.innerHTML="0"+minute.toString()+":"+second.toString();
+                    }
+                    else{
+                        oDiv.innerHTML=minute.toString()+":"+second.toString();
+                    }
+                }
+                else{
+                    show_time=0
+                    oDiv.innerHTML="show timer"
+                }
+            }
+            function Pause(){
+                if (pause==0){
+                    pause=1
+                    document.getElementById("pause").innerHTML="Continue"
+                }
+                else{
+                    pause=0
+                    document.getElementById("pause").innerHTML="Pause"
+                }
+            }
+        </script>
+</head>
+<body>
+<nav style="box-shadow:1px 1px 1px 2px gray;" class="navbar navbar-inverse">
+	  <div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+		  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="#">IELTS Reading</a>
+		</div>
+          <!-- Collect the nav links, forms, and other content for toggling -->
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+			<li onclick="switchTimer()"><a id="timer" style="font-size:25px;width:740px;left:30%;right:70%;text-align:center;" href="#">00:00</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav navbar-right">
+			<li onclick="onSubmit()"><a style="font-size:16px" href="#">Submit</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick=""><a style="font-size:16px" href="/chat">Exit</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick="onSave()"><a id="save" style="font-size:16px" href="#">Save</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick="Pause()"><a id="pause" style="font-size:16px" href="#">Pause</a></li>
+		  </ul>
+			<ul class="nav navbar-nav navbar-right">
+			{% if current_user %}
+				  	<li><a id="current_user" href="javascript:void(0);">{{current_user}}</a></li>
+				  {% endif %}
+		  </ul>
+		</div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
+
+<div style="width:49%;white-space:pre-line;font-size:18px;overflow-y:auto;height:630px;display: inline-block;">
+<div style="font-size:25px;font-weight:bold" align="center">Driverless cars</div>
+<div style="padding-left:3%;padding-right:2%"><b>A</b>&nbsp;   The automotive sector is well used to adapting to automation in manufacturing. The implementation of robotic car manufacture from the 1970s onwards led to significant cost savings and improvements in the reliability and flexibility of vehicle mass production. A new challenge to vehicle production is now on the horizon and, again, it comes from automation. However, this time it is not to do with the manufacturing process, but with the vehicles themselves.
+
+Research projects on vehicle automation are not new. Vehicles with limited self-driving capabilities have been around for more than 50 years, resulting in significant contributions towards driver assistance systems. But since Google announced in 2010 that it had been trialling self-driving cars on the streets of California, progress in this field has quickly gathered pace.
+
+<b>B</b>&nbsp;   There are many reasons why technology is advancing so fast. One frequently cited motive is safety; indeed, research at the UK's Transport Research Laboratory has demonstrated that more than 90 percent of road collisions involve human error as a contributory factor, and it is the primary cause in the vast majority. Automation may help to reduce the incidence of this.
+
+Another aim is to free the time people spend driving for other purposes. If the vehicle can do some or all of the driving, it may be possible to be productive, to socialise or simply to relax while automation systems have responsibility for safe control of the vehicle. If the vehicle can do the driving, those who are challenged by existing mobility models – such as older or disabled travellers – may be able to enjoy significantly greater travel autonomy.
+
+<b>C</b>&nbsp;   Beyond these direct benefits, we can consider the wider implications for transport and society, and how manufacturing processes might need to respond as a result. At present, the average car spends more than 90 percent of its life parked. Automation means that initiatives for car-sharing become much more viable, particularly in urban areas with significant travel demand. If a significant proportion of the population choose to use shared automated vehicles, mobility demand can be met by far fewer vehicles.
+
+<b>D</b>&nbsp;  The Massachusetts Institute of Technology investigated automated mobility in Singapore, finding that fewer than 30 percent of the vehicles currently used would be required if fully automated car sharing could be implemented. If this is the case, it might mean that we need to manufacture far fewer vehicles to meet demand.
+
+However, the number of trips being taken would probably increase, partly because empty vehicles would have to be moved from one customer to the next.
+
+Modelling work by the University of Michigan Transportation Research Institute suggests automated vehicles might reduce vehicle ownership by 43 percent, but that vehicles' average annual mileage would double as a result. As a consequence, each vehicle would be used more intensively, and might need replacing sooner. This faster rate of turnover may mean that vehicle production will not necessarily decrease.
+
+<b>E</b>&nbsp;   Automation may prompt other changes in vehicle manufacture. If we move to a model where consumers are tending not to own a single vehicle but to purchase access to a range of vehicles through a mobility provider, drivers will have the freedom to select one that best suits their needs for a particular journey, rather than making a compromise across all their requirements.
+
+Since, for most of the time, most of the seats in most cars are unoccupied, this may boost production of a smaller, more efficient range of vehicles that suit the needs of individuals. Specialised vehicles may then be available for exceptional journeys, such as going on a family camping trip or helping a son or daughter move to university.
+
+<b>F</b>&nbsp;   There are a number of hurdles to overcome in delivering automated vehicles to our roads. These include the technical difficulties in ensuring that the vehicle works reliably in the infinite range of traffic, weather and road situations it might encounter; the regulatory challenges in understanding how liability and enforcement might change when drivers are no longer essential for vehicle operation; and the societal changes that may be required for communities to trust and accept automated vehicles as being a valuable part of the mobility landscape.
+
+<b>G</b>&nbsp;   It's clear that there are many challenges that need to be addressed but, through robust and targeted research, these can most probably be conquered within the next 10 years. Mobility will change in such potentially significant ways and in association with so many other technological developments, such as telepresence and virtual reality, that it is hard to make concrete predictions about the future. However, one thing is certain: change is coming, and the need to be flexible in response to this will be vital for those involved in manufacturing the vehicles that will deliver future mobility.
+</div>
+</div>
+<div style="padding-left:2%;padding-right:2%;width:49%;white-space:pre-line;font-size:18px;overflow-y:auto;height:630px;display: inline-block;">
+    <b>Questions 14–18</b>
+
+Reading Passage 2 has seven sections, <b>A–G</b>.
+
+Which section contains the following information?
+
+Write the correct letter, <b>A–G</b>, in boxes 14–18 on your answer sheet.
+    <table border="1px;solid black;" style="border-collapse: collapse;">
+        <tr style="background-color: #d0d0d0;text-align:center;">
+            <td><br></td>
+            <td>&nbsp;&nbsp;A&nbsp;&nbsp;</td><td>&nbsp;&nbsp;B&nbsp;&nbsp;</td><td>&nbsp;&nbsp;C&nbsp;&nbsp;</td><td>&nbsp;&nbsp;D&nbsp;&nbsp;</td>
+            <td>&nbsp;&nbsp;E&nbsp;&nbsp;</td><td>&nbsp;&nbsp;F&nbsp;&nbsp;</td><td>&nbsp;&nbsp;G&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>14. reference to the amount of time when a car is not in use</td>
+            <td id="14_1" onclick="set_dike(14,1)"></td>
+            <td id="14_2" onclick="set_dike(14,2)"></td>
+            <td id="14_3" onclick="set_dike(14,3)"></td>
+            <td id="14_4" onclick="set_dike(14,4)"></td>
+            <td id="14_5" onclick="set_dike(14,5)"></td>
+            <td id="14_6" onclick="set_dike(14,6)"></td>
+            <td id="14_7" onclick="set_dike(14,7)"></td>
+        </tr>
+        <tr>
+            <td>15. mention of several advantages of driverless vehicles for individual road-users</td>
+            <td id="15_1" onclick="set_dike(15,1)"></td>
+            <td id="15_2" onclick="set_dike(15,2)"></td>
+            <td id="15_3" onclick="set_dike(15,3)"></td>
+            <td id="15_4" onclick="set_dike(15,4)"></td>
+            <td id="15_5" onclick="set_dike(15,5)"></td>
+            <td id="15_6" onclick="set_dike(15,6)"></td>
+            <td id="15_7" onclick="set_dike(15,7)"></td>
+        </tr>
+        <tr>
+            <td>16. reference to the opportunity of choosing the most appropriate vehicle for each trip</td>
+            <td id="16_1" onclick="set_dike(16,1)"></td>
+            <td id="16_2" onclick="set_dike(16,2)"></td>
+            <td id="16_3" onclick="set_dike(16,3)"></td>
+            <td id="16_4" onclick="set_dike(16,4)"></td>
+            <td id="16_5" onclick="set_dike(16,5)"></td>
+            <td id="16_6" onclick="set_dike(16,6)"></td>
+            <td id="16_7" onclick="set_dike(16,7)"></td>
+        </tr>
+        <tr>
+            <td>17. an estimate of how long it will take to overcome a number of problems</td>
+            <td id="17_1" onclick="set_dike(17,1)"></td>
+            <td id="17_2" onclick="set_dike(17,2)"></td>
+            <td id="17_3" onclick="set_dike(17,3)"></td>
+            <td id="17_4" onclick="set_dike(17,4)"></td>
+            <td id="17_5" onclick="set_dike(17,5)"></td>
+            <td id="17_6" onclick="set_dike(17,6)"></td>
+            <td id="17_7" onclick="set_dike(17,7)"></td>
+        </tr>
+        <tr>
+            <td>18. a suggestion that the use of driverless cars may have no effect on the number of vehicles manufactured</td>
+            <td id="18_1" onclick="set_dike(18,1)"></td>
+            <td id="18_2" onclick="set_dike(18,2)"></td>
+            <td id="18_3" onclick="set_dike(18,3)"></td>
+            <td id="18_4" onclick="set_dike(18,4)"></td>
+            <td id="18_5" onclick="set_dike(18,5)"></td>
+            <td id="18_6" onclick="set_dike(18,6)"></td>
+            <td id="18_7" onclick="set_dike(18,7)"></td>
+        </tr>
+    </table>
+    <b>Questions 19–22</b>
+
+Complete the summary below.
+
+Choose <b>NO MORE THAN TWO WORDS</b> from the passage for each answer.
+
+Write your answers in boxes 19–22 on your answer sheet.
+
+    <div style="font-size:24px;text-align:center;width:100%"><b>The impact of driverless cars</b></div>
+Figures from the Transport Research Laboratory indicate that most motor accidents are partly due to <input id="blank19" placeholder="19" onfocus="this.placeholder=''" onblur="this.placeholder='19'" style="width:150px;text-align:center"><p id="answer19" style="display:inline-block"></p>, so the introduction of driverless vehicles will result in greater safety. In addition to the direct benefits of automation, it may bring other advantages. For example, schemes for <input id="blank20" placeholder="20" onfocus="this.placeholder=''" onblur="this.placeholder='20'" style="width:150px;text-align:center"><p id="answer20" style="display:inline-block"></p> will be more workable, especially in towns and cities, resulting in fewer cars on the road.
+
+According to the University of Michigan Transportation Research Institute, there could be a 43 percent drop in <input id="blank21" placeholder="21" onfocus="this.placeholder=''" onblur="this.placeholder='21'" style="width:150px;text-align:center"><p id="answer21" style="display:inline-block"></p> of cars. However, this would mean that the yearly <input id="blank22" placeholder="22" onfocus="this.placeholder=''" onblur="this.placeholder='22'" style="width:150px;text-align:center"><p id="answer22" style="display:inline-block"></p> of each car would, on average, be twice as high as it currently is. This would lead to a higher turnover of vehicles, and therefore no reduction in automotive manufacturing.
+
+    <b>Questions 23 and 24</b>
+
+Choose <b>TWO</b> letters, <b>A–E</b>.
+
+Write the correct letters in boxes 23 and 24 on your answer sheet.
+
+    23 - 24 Which <b>TWO</b> benefits of automated vehicles does the writer mention?
+
+    <input type="checkbox" name="option23" value="A"><p id="opt23_1" style="display:inline-block">A.Car travellers could enjoy considerable cost savings.</p>
+        <input type="checkbox" name="option23" value="B"><p id="opt23_2" style="display:inline-block">B.It would be easier to find parking spaces in urban areas.</p>
+        <input type="checkbox" name="option23" value="C"><p id="opt23_3" style="display:inline-block">C.Travellers could spend journeys doing something other than driving.</p>
+    <input type="checkbox" name="option23" value="D"><p id="opt23_4" style="display:inline-block">D.People who find driving physically difficult could travel independently.</p>
+    <input type="checkbox" name="option23" value="E"><p id="opt23_5" style="display:inline-block">E.A reduction in the number of cars would mean a reduction in pollution.</p>
+
+        <b>Questions 25 and 26</b>
+
+Choose <b>TWO</b> letters, <b>A–E</b>.
+
+Write the correct letters in boxes 25 and 26 on your answer sheet.
+
+    25 - 26 Which <b>TWO</b> challenges to automated vehicle development does the writer mention?
+
+    <input type="checkbox" name="option25" value="A"><p id="opt25_1" style="display:inline-block">A.making sure the general public has confidence in automated vehicles</p>
+        <input type="checkbox" name="option25" value="B"><p id="opt25_2" style="display:inline-block">B.managing the pace of transition from conventional to automated vehicles</p>
+        <input type="checkbox" name="option25" value="C"><p id="opt25_3" style="display:inline-block">C.deciding how to compensate professional drivers who become redundant</p>
+    <input type="checkbox" name="option25" value="D"><p id="opt25_4" style="display:inline-block">D.setting up the infrastructure to make roads suitable for automated vehicles</p>
+    <input type="checkbox" name="option25" value="E"><p id="opt25_5" style="display:inline-block">E.getting automated vehicles to adapt to various different driving conditions</p>
+
+</div>
+
+</body>
+</html>

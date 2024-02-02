@@ -1,0 +1,178 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<title>translator</title>
+		<style>
+			.clearfix::after {
+				content: "";
+				display: table;
+				clear: both;
+			}
+
+		body{
+				background-image: url(../static/AI.jpg);
+			}
+
+		</style>
+		<link rel="stylesheet" href="../static/plugins/bootstrap_v3/css/bootstrap.min.css">
+		<script src="../static/plugins/bootstrap_v3/js/jquery-3.7.1.min.js"></script>
+		<script src="../static/plugins/bootstrap_v3/js/bootstrap.min.js"></script>
+		<script src="../static/jquery-3.7.1.min.js"></script>
+		<script src="../static/dist2/index.umd.js"></script>
+		<script src="../static/main.js"></script>
+		<script>
+			function lang_select(lang){
+<!--				alert(lang)-->
+				document.getElementById('system').value="translate the sentence that the user sent into"+lang
+				document.getElementById('dropdownMenu1').innerHTML="Translate to "+lang
+			}
+		</script>
+	</head>
+	<body>
+	<nav style="" class="navbar navbar-inverse">
+	  <div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+		  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="#">Assistant</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+		  <ul class="nav navbar-nav">
+			<li><a href="/chat">AI chat</a></li>
+			<li class="active"><a href="/translator">translator<span class="sr-only">(current)</span></a></li>
+			  <li><a href="/voice">real-time translation</a></li>
+			  <li><a href="/chat2">writing grader</a></li>
+			  <li><a href="/assess">oral assessment</a></li>
+			  <li><a href="/video_chat">video chat</a></li>
+			  <li><a href="/upload">speaking grader</a></li>
+			  <li><a href="/text_summary">text summary</a></li>
+			  <li><a href="/upload2">object detection</a></li>
+			  <li class="dropdown">
+			  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">listening<span class="caret"></span></a>
+			  <ul class="dropdown-menu">
+				<li><a href="/listening/1">practice1</a></li>
+				<li><a href="/listening/2">practice2</a></li>
+				<li><a href="/listening/3">practice3</a></li>
+				  <li><a href="/listening/4">practice4</a></li>
+			  </ul>
+			</li>
+			  <li class="dropdown">
+			  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Reading<span class="caret"></span></a>
+			  <ul class="dropdown-menu">
+				<li><a href="/reading/1">practice1</a></li>
+				<li><a href="/reading/2">practice2</a></li>
+				<li><a href="/reading/3">practice3</a></li>
+			  </ul>
+			</li>
+
+		  </ul>
+
+		  <ul class="nav navbar-nav navbar-right">
+			{% if current_user %}
+				  	<li><a id="current_user" href="javascript:void(0);">{{current_user}}</a></li>
+                	<li><a id="tag" href="/logout">Logout</a></li>
+                {% else %}
+					<li><a id="current_user" href="/login">Login</a></li>
+				  	<li><a id="tag" href="/reg">Register</a></li>
+				  {% endif %}
+
+		  </ul>
+		</div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
+		<div hidden="hidden" id="id">Translator</div>
+		<div hidden="hidden" id="voice_opt">alloy</div>
+		<center style="position:relative;">
+			<div class="dropdown" style="display: inline-block;">
+			  <button style="box-shadow:1px 1px 1px 2px gray;" class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				Translate to
+				<span class="caret"></span>
+			  </button>
+				  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="overflow-y: auto;position:absolute;z-index:2;left: 50%;right: 50%;">
+					  <li onclick="lang_select('Arabic')"><a href="#">Arabic</a></li>
+					  <li onclick="lang_select('Chinese')"><a href="#">Chinese</a></li>
+					  <li onclick="lang_select('English')"><a href="#">English</a></li>
+					  <li onclick="lang_select('French')"><a href="#">French</a></li>
+					  <li onclick="lang_select('Hindi')"><a href="#">Hindi</a></li>
+					  <li onclick="lang_select('Persian')"><a href="#">Persian</a></li>
+					  <li onclick="lang_select('Portuguese')"><a href="#">Portuguese</a></li>
+					  <li onclick="lang_select('Russian')"><a href="#">Russian</a></li>
+					  <li onclick="lang_select('Spanish')"><a href="#">Spanish</a></li>
+				  </ul>
+			</div>
+			<div class="dropdown" style="display: inline-block;">
+			  <button style="box-shadow:1px 1px 1px 2px gray;" class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				font size
+				<span class="caret"></span>
+			  </button>
+				  <ul class="dropdown-menu" aria-labelledby="dropdownMenu2" style="overflow-y: auto;position:absolute;z-index:2;left: 50%;right: 50%;">
+					  <li onclick="font_size_set(11)"><a href="#">11</a></li>
+					  <li onclick="font_size_set(12)"><a href="#">12</a></li>
+					  <li onclick="font_size_set(13)"><a href="#">13</a></li>
+					  <li onclick="font_size_set(14)"><a href="#">14</a></li>
+					  <li onclick="font_size_set(15)"><a href="#">15</a></li>
+					  <li onclick="font_size_set(16)"><a href="#">16</a></li>
+					  <li onclick="font_size_set(17)"><a href="#">17</a></li>
+					  <li onclick="font_size_set(18)"><a href="#">18</a></li>
+					  <li onclick="font_size_set(19)"><a href="#">19</a></li>
+					  <li onclick="font_size_set(20)"><a href="#">20</a></li>
+				  </ul>
+			</div>
+			<div class="dropdown" style="display: inline-block;">
+			  <button style="box-shadow:1px 1px 1px 2px gray;" class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				voice option
+				<span class="caret"></span>
+			  </button>
+				  <ul class="dropdown-menu" aria-labelledby="dropdownMenu3" style="overflow-y: auto;position:absolute;z-index:2;left: 50%;right: 50%;">
+					  <li onclick="voice_opt_set('alloy')"><a href="#">Alloy</a></li>
+					  <li onclick="voice_opt_set('echo')"><a href="#">Echo</a></li>
+					  <li onclick="voice_opt_set('fable')"><a href="#">Fable</a></li>
+					  <li onclick="voice_opt_set('onyx')"><a href="#">Onyx</a></li>
+					  <li onclick="voice_opt_set('nova')"><a href="#">Nova</a></li>
+					  <li onclick="voice_opt_set('shimmer')"><a href="#">Shimmer</a></li>
+				  </ul>
+			</div>
+			<br><br>
+			<div id="parent" style="box-shadow:1px 1px 1px 2px gray;background-color:#F0F0F0;width:480px; border:1px solid #000;z-index:0;
+			border-radius: 10px;
+			height:480px; overflow-y: auto;"></div>
+			<br>
+
+			<button id="clearButton" type="button" onclick="clearChat()" class="btn btn-default"
+								style="box-shadow:1px 1px 1px 2px gray;height:35px;vertical-align:middle;display: inline-block;">
+							<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+			</button>
+			<input type="hidden" id="system" value="translate the sentence that the user sent into Chinese">
+			<textarea
+				   placeholder="Enter the question"
+				   cols="63" rows="3"
+				   id="myquestion"
+				   style="box-shadow:1px 1px 1px 2px gray;vertical-align:middle;border-radius: 10px;resize:none"
+				   onkeydown="if(!event.shiftKey && event.keyCode === 13 ) chat(1)"
+			></textarea>
+
+			<div style="vertical-align:middle;display: inline-block;">
+				<div id="sendButtonArea">
+					<button id="sendButton" style="box-shadow:1px 1px 1px 2px gray;height:35px;" type="button" onclick="chat(1)" class="btn btn-default">
+									<span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+					</button>
+				</div>
+
+				<div id="stopButtonArea" hidden="hidden">
+				<button id="stopButton" style="box-shadow:1px 1px 1px 2px gray;height:35px;" type="button" onclick="abortStream(1)" class="btn btn-default">
+								<span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+				</button>
+				</div>
+			</div>
+			<br><br>
+		</center>
+	</body>
+</html>

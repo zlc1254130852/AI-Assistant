@@ -1,0 +1,250 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<title>writing grader</title>
+		<style>
+			.clearfix::after {
+				content: "";
+				display: table;
+				clear: both;
+			}
+
+		body{
+				background-image: url(../static/AI.jpg);
+			}
+
+		</style>
+		<link rel="stylesheet" href="../static/plugins/bootstrap_v3/css/bootstrap.min.css">
+		<script src="../static/plugins/bootstrap_v3/js/jquery-3.7.1.min.js"></script>
+		<script src="../static/plugins/bootstrap_v3/js/bootstrap.min.js"></script>
+		<script src="../static/jquery-3.7.1.min.js"></script>
+		<script>
+			var counter=0;
+			var chatFrame;
+			var user=""
+			window.onload = function () {
+
+				chatFrame=document.getElementById("parent")
+				if(document.getElementById("current_user"))
+            		user=document.getElementById("current_user").innerHTML
+
+			}
+
+			function chat2(){
+			// send message
+				if(document.getElementById('tag').innerHTML=="Register"){
+					alert("Please log in to proceed");
+					return;
+				}
+				content=""
+				tmp_question=$("#myquestion").val()
+				if (tmp_question.trim()=="")
+					return
+				document.getElementById('myquestion').value="";
+
+				addElementDiv(tmp_question,counter,"user")
+				setTimeout(function(){
+					chatFrame.scrollTop = chatFrame.scrollHeight;
+				},0);
+				counter+=1
+
+				fetch('/chat2', {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+    					query: tmp_question,
+    					current_user:user
+					}),
+				}).then(response => {
+//				    console.log(response)
+
+					const reader = response.body.getReader();
+					const decoder = new TextDecoder('utf-8');
+
+					addElementDiv("",counter,"assistant");
+					var show=document.getElementById('div'+counter.toString())
+					counter+=1
+
+                    let buffer = '';
+
+                        function processStreamResult(result2) {
+                            const chunk = decoder.decode(result2.value, { stream: !result2.done });
+                            buffer += chunk;
+
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop();
+
+                            lines.forEach(line => {
+                                if (line.trim().length > 0) {
+
+                                  var obj=JSON.parse(line.slice(6))
+
+								  if (obj.event!="message_end"){
+									content+=obj.answer
+			<!--                      	document.getElementById('parent').value=content-->
+									show.innerHTML = content;
+									chatFrame.scrollTop = chatFrame.scrollHeight;
+								  }
+								  else{
+									content+="\n"
+			<!--                      	document.getElementById('parent').value=content-->
+									show.innerHTML = content;
+									chatFrame.scrollTop = chatFrame.scrollHeight;
+								  }
+								  console.log("--------------------------------------------")
+
+                                }
+                            });
+
+                            if (!result2.done) {
+                                return reader.read().then(processStreamResult);
+                            }
+                        }
+
+                        return reader.read().then(processStreamResult);
+                    })
+						.catch(error => {
+							console.error('Error:', error);
+						});
+			}
+			function addElementDiv(message,counter,speaker){
+			// add a block to show the new message
+				var parent = document.getElementById("parent")
+				if (parent==null)
+					console.log("empty")
+				let div_0 = document.createElement("div")
+				div_0.setAttribute("class","clearfix")
+				div_0.setAttribute("id","div_0"+counter.toString())
+
+				let div0 = document.createElement("div")
+				let div00 = document.createElement("br")
+				let div01 = document.createElement("br")
+				let div1 = document.createElement("div")
+
+				div0.setAttribute("id","div0"+counter.toString())
+				div00.setAttribute("id","div00"+counter.toString())
+				div01.setAttribute("id","div01"+counter.toString())
+				div1.setAttribute("id","div"+counter.toString())
+
+				div1.style.maxWidth = "300px"
+				div1.style.backgroundColor = "#90EE90";
+				div1.style.border = "1px solid black";
+				div1.style.textAlign = "left";
+				div1.style.padding = "2px"
+				div1.style.whiteSpace = "pre-line"
+				div1.style.boxShadow = "1px 1px 1px 2px gray";
+
+				if (speaker==="user"){
+					div0.style.float = "right";
+					div00.style.float = "right";
+					div1.style.float = "right";
+				}
+				else{
+					div0.style.float = "left";
+					div00.style.float = "left";
+					div1.style.float = "left";
+				}
+				div1.style.borderRadius = "5px";
+				div0.innerHTML=speaker;
+				div1.innerHTML=message;
+
+				parent.appendChild(div_0)
+				parent.appendChild(div0)
+				parent.appendChild(div00)
+				parent.appendChild(div1)
+				parent.appendChild(div01)
+			}
+		</script>
+	</head>
+	<body>
+		<nav style="" class="navbar navbar-inverse">
+		  <div class="container-fluid">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header">
+			  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			  </button>
+			  <a class="navbar-brand" href="#">Assistant</a>
+			</div>
+
+			<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			  <ul class="nav navbar-nav">
+				<li><a href="/chat">AI chat</a></li>
+				<li><a href="/translator">translator</a></li>
+				  <li><a href="/voice">real-time translation</a></li>
+				  <li class="active"><a href="/chat2">writing grader<span class="sr-only">(current)</span></a></li>
+				  <li><a href="/assess">oral assessment</a></li>
+				  <li><a href="/video_chat">video chat</a></li>
+			  		<li><a href="/upload">speaking grader</a></li>
+				  <li><a href="/text_summary">text summary</a></li>
+			 	 	<li><a href="/upload2">object detection</a></li>
+				  <li class="dropdown">
+			  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">listening<span class="caret"></span></a>
+			  <ul class="dropdown-menu">
+				<li><a href="/listening/1">practice1</a></li>
+				<li><a href="/listening/2">practice2</a></li>
+				<li><a href="/listening/3">practice3</a></li>
+				  <li><a href="/listening/4">practice4</a></li>
+			  </ul>
+			</li>
+			  <li class="dropdown">
+			  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Reading<span class="caret"></span></a>
+			  <ul class="dropdown-menu">
+				<li><a href="/reading/1">practice1</a></li>
+				<li><a href="/reading/2">practice2</a></li>
+				<li><a href="/reading/3">practice3</a></li>
+			  </ul>
+			</li>
+
+			  </ul>
+
+			  <ul class="nav navbar-nav navbar-right">
+				{% if current_user %}
+				  	<li><a id="current_user" href="javascript:void(0);">{{current_user}}</a></li>
+                	<li><a id="tag" href="/logout">Logout</a></li>
+                {% else %}
+					<li><a id="current_user" href="/login">Login</a></li>
+				  	<li><a id="tag" href="/reg">Register</a></li>
+				  {% endif %}
+
+			  </ul>
+			</div><!-- /.navbar-collapse -->
+		  </div><!-- /.container-fluid -->
+		</nav>
+		<!--insert a table-->
+		<center>
+			<br><br>
+			<div id="parent" style="box-shadow:1px 1px 1px 2px gray;background-color: #F0F0F0;width:480px; border:1px solid #000;
+			border-radius: 10px;
+			height:480px; overflow-y: auto;resize:none"></div>
+
+			<br>
+
+			<button id="clearButton" type="button" onclick="" class="btn btn-default" style="box-shadow:1px 1px 1px 2px gray;height:35px;vertical-align:middle;display: inline-block;">
+						<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+			</button>
+
+			<input type="hidden" id="system" value="You are an AI assistant.">
+			<textarea
+				   placeholder="Enter the question"
+				   cols="63" rows="3"
+				   id="myquestion"
+				   style="box-shadow:1px 1px 1px 2px gray;vertical-align:middle;border-radius: 10px;resize:none"
+				   onkeydown="if(!event.shiftKey && event.keyCode === 13 ) chat2()"
+			></textarea>
+			<div style="vertical-align:middle;display: inline-block;">
+				<button id="sendButton" style="box-shadow:1px 1px 1px 2px gray;height:35px" type="button" onclick="chat2()" class="btn btn-default">
+							<span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+				</button>
+			</div>
+			<br><br>
+		</center>
+	</body>
+</html>

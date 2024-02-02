@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Title</title>
+	<style>
+		body{
+				background-image: url(../static/AI.jpg);
+			}
+	</style>
+    <link rel="stylesheet" href="../static/plugins/bootstrap_v3/css/bootstrap.min.css">
+		<script src="../static/plugins/bootstrap_v3/js/jquery-3.7.1.min.js"></script>
+		<script src="../static/plugins/bootstrap_v3/js/bootstrap.min.js"></script>
+		<script src="../static/jquery-3.7.1.min.js"></script>
+	<script>
+		var user=""
+		var content=""
+
+		window.onload = function () {
+			chatFrame=document.getElementById("parent")
+			if(document.getElementById("current_user"))
+				user=document.getElementById("current_user").innerHTML
+			fileUploader = document.getElementById('file-uploader');
+			fileUploader.addEventListener('change', (event) => {
+			files = event.target.files;
+			console.log('files', files);
+		  });
+		}
+
+		function send_file(){
+			if(document.getElementById('tag').innerHTML=="Register"){
+				alert("Please log in to proceed");
+				return;
+			}
+			if (!files){
+				alert("Please upload file!")
+				return;
+			}
+			var formData = new FormData();
+			var file = files[0];
+			formData.append('file', file);
+			formData.append('user', user);
+			content=""
+			document.getElementById("parent").innerHTML=""
+			files=""
+			document.getElementById("file-uploader").value=""
+
+			content=""
+			fetch('/file3',{
+				method: 'POST',
+				body: formData,
+			}).then(response => {
+					console.log(response)
+
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder('utf-8');
+                        var show=document.getElementById('parent')
+                        let buffer = '';
+
+                        function processStreamResult(result2) {
+                            const chunk = decoder.decode(result2.value, { stream: !result2.done });
+                            buffer += chunk;
+
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop();
+
+                            lines.forEach(line => {
+                                if (line.trim().length > 0) {
+
+                                  var obj=JSON.parse(line)
+
+								  if (obj.finish_reason==null){
+									content+=obj.delta
+									show.innerHTML = content;
+									show.scrollTop = show.scrollHeight;
+								  }
+								  else{
+									content+="\n"
+
+									show.innerHTML = content;
+									show.scrollTop = show.scrollHeight;
+								  }
+								  console.log("--------------------------------------------")
+
+                                }
+                            });
+
+                            if (!result2.done) {
+                                return reader.read().then(processStreamResult);
+                            }
+                        }
+
+                        return reader.read().then(processStreamResult);
+                    })
+						.catch(error => {
+							console.error('Error:', error);
+						});
+		}
+
+		function send(){
+		// send text message
+			if(document.getElementById('tag').innerHTML=="Register"){
+				alert("Please log in to proceed");
+				return;
+			}
+			tmp_question=document.getElementById('myquestion').value
+			document.getElementById('myquestion').value=""
+
+			if (tmp_question.trim()==""){
+				alert("Cannot send empty message!")
+				return;
+			}
+
+				content=""
+				fetch('/summarize', {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						current_user: user,
+						text: tmp_question.trim()
+					}),
+				}).then(response => {
+				    console.log(response)
+
+				        const reader = response.body.getReader();
+                        const decoder = new TextDecoder('utf-8');
+                        var show=document.getElementById('parent')
+                        let buffer = '';
+
+                        function processStreamResult(result2) {
+                            const chunk = decoder.decode(result2.value, { stream: !result2.done });
+                            buffer += chunk;
+
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop();
+
+                            lines.forEach(line => {
+                                if (line.trim().length > 0) {
+								  var obj=JSON.parse(line)
+
+								  if (obj.finish_reason==null){
+									content+=obj.delta
+									show.innerHTML = content;
+									show.scrollTop = show.scrollHeight;
+								  }
+								  else{
+									content+="\n"
+
+									show.innerHTML = content;
+									show.scrollTop = show.scrollHeight;
+								  }
+								  console.log("--------------------------------------------")
+
+                                }
+                            });
+
+                            if (!result2.done) {
+                                return reader.read().then(processStreamResult);
+                            }
+                        }
+
+                        return reader.read().then(processStreamResult);
+                    })
+						.catch(error => {
+							console.error('Error:', error);
+						});
+		}
+	</script>
+</head>
+<body>
+<nav style="" class="navbar navbar-inverse">
+	  <div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+		  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="#">Assistant</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+		  <ul class="nav navbar-nav">
+			<li><a href="/chat">AI chat</a></li>
+			<li><a href="/translator">translator</a></li>
+			  <li><a href="/voice">real-time translation</a></li>
+			  <li><a href="/chat2">writing grader</a></li>
+			  <li><a href="/assess">oral assessment</a></li>
+			  <li><a href="/video_chat">video chat</a></li>
+			  <li><a href="/upload">speaking grader</a></li>
+			  <li class="active"><a href="/text_summary">text summary<span class="sr-only">(current)</span></a></li>
+			  <li><a href="/upload2">object detection</a></li>
+			  <li class="dropdown">
+			  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">listening<span class="caret"></span></a>
+			  <ul class="dropdown-menu">
+				<li><a href="/listening/1">practice1</a></li>
+				<li><a href="/listening/2">practice2</a></li>
+				<li><a href="/listening/3">practice3</a></li>
+				  <li><a href="/listening/4">practice4</a></li>
+			  </ul>
+			</li>
+			  <li class="dropdown">
+			  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Reading<span class="caret"></span></a>
+			  <ul class="dropdown-menu">
+				<li><a href="/reading/1">practice1</a></li>
+				<li><a href="/reading/2">practice2</a></li>
+				<li><a href="/reading/3">practice3</a></li>
+			  </ul>
+			</li>
+
+		  </ul>
+
+		  <ul class="nav navbar-nav navbar-right">
+			{% if current_user %}
+				  	<li><a id="current_user" href="javascript:void(0);">{{current_user}}</a></li>
+                	<li><a id="tag" href="/logout">Logout</a></li>
+                {% else %}
+					<li><a id="current_user" href="/login">Login</a></li>
+				  	<li><a id="tag" href="/reg">Register</a></li>
+				  {% endif %}
+
+		  </ul>
+		</div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
+<center>
+    <br><br>
+   <div id="parent" style="white-space:pre-line;text-align:left;box-shadow:1px 1px 1px 2px gray;background-color: #F0F0F0;width:480px; border:1px solid #000;
+			border-radius: 10px;
+			height:380px; overflow-y: auto;resize:none"></div>
+    <br>
+    <button id="clearButton" type="button" onclick="" class="btn btn-default" style="box-shadow:1px 1px 1px 2px gray;height:35px;vertical-align:middle;display: inline-block;">
+						<span class="glyphicon glyphicon-erase" aria-hidden="true"></span>
+			</button>
+<textarea
+				   placeholder="Enter the question"
+				   cols="63" rows="3"
+				   id="myquestion"
+				   style="box-shadow:1px 1px 1px 2px gray;vertical-align:middle;border-radius: 10px;resize:none"
+				   onkeydown="if(!event.shiftKey && event.keyCode === 13 ) send()"
+			></textarea>
+    <div style="vertical-align:middle;display: inline-block;">
+				<button id="sendButton" style="box-shadow:1px 1px 1px 2px gray;height:35px" type="button" onclick="send()" class="btn btn-default">
+							<span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+				</button>
+			</div>
+	<br><br>
+	<div style="vertical-align:middle;margin-left:40px;display: inline-block;">
+	<input type="file" id="file-uploader" style="box-shadow:1px 1px 1px 2px gray;background-color: #F0F0F0;border: 1px solid black;border-radius: 10px;width:400px;height:100px;">
+	</div>
+		<div style="vertical-align:middle;display: inline-block;">
+				<button id="sendButton2" style="box-shadow:1px 1px 1px 2px gray;height:35px" type="button" onclick="send_file()" class="btn btn-default">
+							<span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+				</button>
+			</div>
+</center>
+
+
+</body>
+</html>

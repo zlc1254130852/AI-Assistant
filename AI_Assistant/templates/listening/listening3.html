@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Title</title>
+    <style>
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+
+    ::-webkit-scrollbar-track {
+      background-color: #f1f1f1;
+    }
+
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #6698FF;
+    }
+
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #6698FF;
+    }
+    </style>
+    <link rel="stylesheet" href="../static/plugins/bootstrap_v3/css/bootstrap.min.css">
+		<script src="../static/plugins/bootstrap_v3/js/jquery-3.7.1.min.js"></script>
+		<script src="../static/plugins/bootstrap_v3/js/bootstrap.min.js"></script>
+        <script>
+        var show_time=1;
+        var pause=0
+        const choices=['A','B','C','D','E','F','G','H']
+        const choices_text=["outgoing","selfish","independent","attention-seeking","introverted","co-operative","caring","competitive"]
+        var second;
+        var minute;
+        var oDiv;
+        var answers;
+        var answers_tmp=["-1","-1","-1","-1","-1","-1","-1","-1","-1","-1"]
+        var user=""
+
+        window.onload=function ()
+        {
+            if(document.getElementById("current_user"))
+            	user=document.getElementById("current_user").innerHTML
+            if(user==""){
+            	window.location.href = "/chat"
+				alert("Please log in to proceed");
+				return;
+			}
+        	$.ajax({
+					url: "/load",
+					type: "POST",
+					data: {
+					    current_user:user,
+						practice_name: "listening3",
+					},
+					dataType: "json",
+					success: function(response) {
+						if (response.code!=-1)
+						{
+						    for (n=0;n<6;n++){
+						        if(response.record_info[n]!="-1"){
+						            var data="answer"+choices.indexOf(response.record_info[n]).toString()
+                                    document.getElementById(data).style.position="absolute"
+                                    document.getElementById(data).style.top=0
+                                    document.getElementById(data).style.width="100%"
+
+                                    document.getElementById("blank_"+(n+1).toString()).innerHTML=""
+                                    document.getElementById("blank_"+(n+1).toString()).style.textAlign="left"
+
+                                    document.getElementById("blank_"+(n+1).toString()).appendChild(document.getElementById(data))
+                                    if (document.getElementById("br"+data.slice(-1))){
+                                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)))
+                                    }
+                                    if (document.getElementById("br"+data.slice(-1)+data.slice(-1))){
+                                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)+data.slice(-1)))
+                                    }
+
+                                    let div00 = document.getElementById(data)
+                                    div00.setAttribute("draggable",'true')
+                                    div00.setAttribute("ondragstart","drag(event)")
+                                    div00.setAttribute("ondrop","drop(event,4);event.cancelBubble = true")
+                                    div00.setAttribute("ondragover","allowDrop(event)")
+
+                                    for (i=1;i<7;i++){
+                                        let tmp=document.getElementById("blank_"+i.toString())
+                                        if ($("#blank_"+i.toString()).children().length==0){
+                                            tmp.innerHTML=(i+20).toString()
+                                            tmp.style.textAlign="center"
+                                        }
+                                    }
+						        }
+						    }
+
+						    for(i=27;i<29;i++){
+                                let rPort = document.getElementsByName("option"+i.toString());
+
+                                for(j=0;j<3;j++)
+                                {
+                                    if(rPort[j].value==response.record_info[i-21]){
+                                        console.log(rPort[j].value);
+                                        rPort[j].checked=true
+                                    }
+
+                                }
+                            }
+                            var cks = document.getElementsByName("option29");
+
+                            i=8
+
+                            for(var j = 0; j < cks.length; j++){
+                                var ck = cks[j];
+                                if(ck.value==response.record_info[i]){
+                                    console.log(choices[j]);
+                                    ck.checked=true
+                                    i+=1
+                                }
+                            }
+						}
+
+					}
+				});
+
+            oDiv=document.getElementById('timer');
+            second=1;
+            minute=0;
+            setInterval(function(){
+                if (pause==0)
+                if (show_time==1){
+                    if (second<=9 && minute<=9){
+                         oDiv.innerHTML="0"+minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (second<=9){
+                        oDiv.innerHTML=minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (minute<=9){
+                        oDiv.innerHTML="0"+minute.toString()+":"+second.toString();
+                    }
+                    else{
+                        oDiv.innerHTML=minute.toString()+":"+second.toString();
+                    }
+                }
+                else{
+                    oDiv.innerHTML="show timer"
+                }
+
+                if (pause==0)
+                    second++;
+
+                if(second==60){
+
+                    second=0;
+                    minute++;
+
+                }
+                if(minute==60){
+                    minute=0;
+                }
+
+            },1000);
+
+            for(i=0;i<8;i++){
+                let div0 = document.createElement("div")
+                div0.setAttribute("id","answer"+i.toString())
+                div0.setAttribute("style","height:30px;background-color:#B4CFEC;z-index:1;display: inline-block;")
+                div0.setAttribute("draggable",'true')
+                div0.setAttribute("ondragstart","drag(event)")
+                div0.setAttribute("ondrop","drop(event,3);event.cancelBubble = true")
+                div0.setAttribute("ondragover","return false")
+                div0.innerHTML="&nbsp;&nbsp;"+choices[i]+". "+choices_text[i]+"&nbsp;&nbsp;"
+
+                let div00 = document.createElement("br")
+                div00.setAttribute("id","br"+i.toString())
+                let div01 = document.createElement("br")
+                div01.setAttribute("id","br"+i.toString()+i.toString())
+
+                document.getElementById("ans_list").appendChild(div0)
+                document.getElementById("ans_list").appendChild(div00)
+                document.getElementById("ans_list").appendChild(div01)
+            }
+            var cks = document.getElementsByName("option29");
+                for(var i = 0; i < cks.length; i++){
+                    cks[i].onclick = function(){
+                        if(!this.checked) return;
+                        var sum = 0;
+                        for(var j = 0; j < cks.length; j++){
+                            var ck = cks[j];
+                            if(ck.checked){
+                                sum++;
+                            }
+                        }
+                        if(sum > 2){
+                            this.checked = false;
+                        }
+                    }
+                }
+
+        };
+            function onSave(){
+                for (i=1;i<7;i++){
+                    if ($("#blank_"+i.toString()).children().length==1)
+                    {
+                        console.log(choices[parseInt(document.getElementById("blank"+"_"+i.toString()).children[0].id.toString().slice(-1))])
+                        answers_tmp[i-1]=choices[parseInt(document.getElementById("blank"+"_"+i.toString()).children[0].id.toString().slice(-1))]
+                    }
+                }
+                for(i=27;i<29;i++){
+                    let rPort = document.getElementsByName("option"+i.toString());
+
+                    for(j=0;j<3;j++)
+                    {
+                        if(rPort[j].checked){
+                            console.log(rPort[j].value);
+                            answers_tmp[i-21]=rPort[j].value
+                        }
+
+                    }
+                }
+                var cks = document.getElementsByName("option29");
+
+                i=8
+
+                for(var j = 0; j < cks.length; j++){
+                    var ck = cks[j];
+                    if(ck.checked){
+                        console.log(choices[j]);
+
+                        answers_tmp[i]=choices[j]
+                        i+=1
+                    }
+                }
+				$.ajax({
+					url: "/save",
+					type: "POST",
+					data: {
+					    current_user:user,
+						practice_name: "listening3",
+						answers_to_save: JSON.stringify(answers_tmp)
+					},
+					dataType: "json",
+					success: function(response) {
+						alert("Answers saved successfully");
+					}
+				});
+			}
+            function onSubmit(){
+                $.ajax({
+                    type: 'GET',
+                    url: '/submit/listening3',
+                    data: {
+                    },
+                    success: function (res) {
+                        console.log(res);
+                        answers=res
+                        document.getElementById("answer_area").style.color="green"
+                        document.getElementById("answer_area").innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Answers: "
+                        for (i=1;i<7;i++){
+                            document.getElementById("answer_area").innerHTML+=answers[i-1]
+                            if ($("#blank_"+i.toString()).children().length==1)
+                            {
+                                console.log(choices[parseInt(document.getElementById("blank"+"_"+i.toString()).children[0].id.toString().slice(-1))])
+                                if(choices[parseInt(document.getElementById("blank"+"_"+i.toString()).children[0].id.toString().slice(-1))]!=answers[i-1])
+                                {
+                                    document.getElementById("blank"+"_"+i.toString()).children[0].style.color="red"
+                                }
+                                else{
+                                    document.getElementById("blank"+"_"+i.toString()).children[0].style.color="green"
+                                }
+                            }
+                            else{
+                                console.log("null")
+                            }
+                        }
+                        for(i=27;i<29;i++){
+                             let rPort = document.getElementsByName("option"+i.toString());
+
+                            for(j=0;j<3;j++)
+                            {
+                                if (rPort[j].value==answers[i-21]){
+                                    document.getElementById("opt"+i.toString()+"_"+(j+1).toString()).style.color="green";
+                                }
+                                else{
+                                    document.getElementById("opt"+i.toString()+"_"+(j+1).toString()).style.color="black";
+                                }
+                                if(rPort[j].checked){
+                                    console.log(rPort[j].value);
+                                    if (rPort[j].value!=answers[i-21])
+                                    {
+                                        document.getElementById("opt"+i.toString()+"_"+(j+1).toString()).style.color="red";
+                                    }
+                                }
+
+                            }
+                        }
+                        var cks = document.getElementsByName("option29");
+
+                                for(var j = 0; j < cks.length; j++){
+                                    if (cks[j].value==answers[8]||cks[j].value==answers[9])
+                                    {
+                                        document.getElementById("opt29"+"_"+(j+1).toString()).style.color="green";
+                                    }
+                                    else{
+                                        document.getElementById("opt29"+"_"+(j+1).toString()).style.color="black";
+                                    }
+                                    var ck = cks[j];
+                                    if(ck.checked){
+                                        console.log(choices[j]);
+                                        if (!(cks[j].value==answers[8]||cks[j].value==answers[9]))
+                                        {
+                                            document.getElementById("opt29"+"_"+(j+1).toString()).style.color="red";
+                                        }
+                                    }
+                                }
+                        }})
+            }
+            function drag(ev){
+                ev.dataTransfer.setData("text", ev.target.id)
+            }
+            function allowDrop(ev){
+                ev.preventDefault();
+            }
+            function drop(ev,opt){
+
+                if (opt==1){ // from answer list to blank
+                    console.log("in")
+                    ev.preventDefault();
+                    var data=ev.dataTransfer.getData("text");
+
+                    document.getElementById(data).style.position="absolute"
+                    document.getElementById(data).style.top=0
+                    document.getElementById(data).style.width="100%"
+
+                    ev.target.innerHTML=""
+                    ev.target.style.textAlign="left"
+
+                    ev.target.appendChild(document.getElementById(data))
+                    if (document.getElementById("br"+data.slice(-1))){
+                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)))
+                    }
+                    if (document.getElementById("br"+data.slice(-1)+data.slice(-1))){
+                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)+data.slice(-1)))
+                    }
+
+                    let div00 = document.getElementById(data)
+                    div00.setAttribute("draggable",'true')
+                    div00.setAttribute("ondragstart","drag(event)")
+                    div00.setAttribute("ondrop","drop(event,4);event.cancelBubble = true")
+                    div00.setAttribute("ondragover","allowDrop(event)")
+
+                    for (i=1;i<7;i++){
+                        let tmp=document.getElementById("blank_"+i.toString())
+                        if ($("#blank_"+i.toString()).children().length==0){
+                            tmp.innerHTML=(i+20).toString()
+                            tmp.style.textAlign="center"
+                        }
+                    }
+                }
+                else if (opt==2){ // drag out of the blank to a margin area within the answer list
+                    console.log("out")
+                    ev.preventDefault();
+                    var data=ev.dataTransfer.getData("text");
+                    if (document.getElementById("br"+data.slice(-1))){
+                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)))
+                    }
+                    if (document.getElementById("br"+data.slice(-1)+data.slice(-1))){
+                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)+data.slice(-1)))
+                    }
+
+                    document.getElementById(data).setAttribute("style","height:30px;background-color:#B4CFEC;z-index:1;display: inline-block;")
+                    console.log(ev.target.children.length)
+
+                    let found_bigger=0
+                    for(i=0;i<ev.target.children.length;i++)
+                    {
+                        if(typeof(ev.target.children[i].getAttribute("id"))=="string")
+                            if (ev.target.children[i].getAttribute("id").slice(0,1)=='a')
+                            {
+                                if (parseInt(ev.target.children[i].getAttribute("id").slice(-1))>parseInt(data.slice(-1)))
+                                {
+                                    found_bigger=1
+                                    console.log(ev.target.children[i].getAttribute("id"))
+                                    ev.target.children[i].before(document.getElementById(data))
+                                    break
+                                }
+                            }
+                    }
+                    if (found_bigger==0)
+                        ev.target.appendChild(document.getElementById(data))
+
+                    let div00 = document.getElementById(data)
+                    div00.setAttribute("draggable",'true')
+                    div00.setAttribute("ondragstart","drag(event)")
+                    div00.setAttribute("ondrop","drop(event,3);event.cancelBubble = true")
+                    div00.setAttribute("ondragover","allowDrop(event)")
+
+                    let div11 = document.createElement("br")
+                    div11.setAttribute("id","br"+data.slice(-1))
+                    $("#"+data).after(div11)
+
+                    let div12 = document.createElement("br")
+                    div12.setAttribute("id","br"+data.slice(-1)+data.slice(-1))
+                    div11.after(div12)
+
+                    for (i=1;i<7;i++){
+                        let tmp=document.getElementById("blank_"+i.toString())
+                        if ($("#blank_"+i.toString()).children().length==0){
+                            tmp.innerHTML=(i+20).toString()
+                            tmp.style.textAlign="center"
+                        }
+                    }
+
+                }
+                 else if (opt==3){ // move out to the surface of another answer in the list
+                    console.log("out")
+                    ev.preventDefault();
+                    var data=ev.dataTransfer.getData("text");
+
+                    let tmp_list = document.getElementById("ans_list")
+
+                    for(i=0;i<tmp_list.children.length;i++)
+                    {
+                        if(typeof(tmp_list.children[i].getAttribute("id"))=="string")
+                            if (tmp_list.children[i].getAttribute("id")==data)
+                            {
+                                return;
+                            }
+
+                    }
+
+                    if (document.getElementById("br"+data.slice(-1))){
+                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)))
+                    }
+                    if (document.getElementById("br"+data.slice(-1)+data.slice(-1))){
+                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)+data.slice(-1)))
+                    }
+                    document.getElementById(data).setAttribute("style","height:30px;background-color:#B4CFEC;z-index:1;display: inline-block;")
+
+                    let found_bigger=0
+                    for(i=0;i<tmp_list.children.length;i++)
+                    {
+                        if(typeof(tmp_list.children[i].getAttribute("id"))=="string")
+                            if (tmp_list.children[i].getAttribute("id").slice(0,1)=='a')
+                            {
+                                if (parseInt(tmp_list.children[i].getAttribute("id").slice(-1))>parseInt(data.slice(-1)))
+                                {
+                                    found_bigger=1
+                                    console.log(tmp_list.children[i].getAttribute("id"))
+                                    tmp_list.children[i].before(document.getElementById(data))
+                                    break
+                                }
+                            }
+
+                    }
+                    if (found_bigger==0)
+                        tmp_list.appendChild(document.getElementById(data))
+
+                    let div00 = document.getElementById(data)
+                    div00.setAttribute("draggable",'true')
+                    div00.setAttribute("ondragstart","drag(event)")
+                    div00.setAttribute("ondrop","drop(event,3);event.cancelBubble = true")
+                    div00.setAttribute("ondragover","allowDrop(event)")
+
+                    let div11 = document.createElement("br")
+                    div11.setAttribute("id","br"+data.slice(-1))
+                    $("#"+data).after(div11)
+
+                    let div12 = document.createElement("br")
+                    div12.setAttribute("id","br"+data.slice(-1)+data.slice(-1))
+                    $("#"+data).after(div12)
+
+                    for (i=1;i<7;i++){
+                        let tmp=document.getElementById("blank_"+i.toString())
+                        if ($("#blank_"+i.toString()).children().length==0){
+                            tmp.innerHTML=(i+20).toString()
+                            tmp.style.textAlign="center"
+                        }
+                    }
+                }
+                else if (opt==4){ // replacement
+                    console.log("inout")
+                    ev.preventDefault();
+                    var data=ev.dataTransfer.getData("text");
+
+                    let div00 = document.getElementById(data)
+                    div00.setAttribute("draggable",'true')
+                    div00.setAttribute("ondragstart","drag(event)")
+                    div00.setAttribute("ondrop","drop(event,4);event.cancelBubble = true")
+                    div00.setAttribute("ondragover","allowDrop(event)")
+
+                    let tmp_parent = ev.target.parentNode
+                    let tmp_id = ev.target.getAttribute("id")
+
+                    ev.target.setAttribute("draggable",'true')
+                    ev.target.setAttribute("ondragstart","drag(event)")
+                    ev.target.setAttribute("ondrop","drop(event,3);event.cancelBubble = true")
+                    ev.target.setAttribute("ondragover","return false")
+
+                    console.log(tmp_parent)
+
+                    tmp_parent.appendChild(document.getElementById(data))
+                    document.getElementById(data).setAttribute("style","height:30px;width:100%;background-color:#B4CFEC;z-index:1;display: inline-block;")
+
+                    if (document.getElementById("br"+data.slice(-1))){
+                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)))
+                    }
+                    if (document.getElementById("br"+data.slice(-1)+data.slice(-1))){
+                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)+data.slice(-1)))
+                    }
+
+                    document.getElementById(tmp_id).setAttribute("style","height:30px;background-color:#B4CFEC;z-index:1;display: inline-block;")
+                    let tmp_list = document.getElementById("ans_list")
+                    let found_bigger=0
+                    for(i=0;i<tmp_list.children.length;i++)
+                    {
+                        if(typeof(tmp_list.children[i].getAttribute("id"))=="string")
+                            if (tmp_list.children[i].getAttribute("id").slice(0,1)=='a')
+                            {
+                                if (parseInt(tmp_list.children[i].getAttribute("id").slice(-1))>parseInt(tmp_id.slice(-1)))
+                                {
+                                    found_bigger=1
+                                    tmp_list.children[i].before(document.getElementById(tmp_id))
+                                    break
+                                }
+                            }
+                    }
+                    if (found_bigger==0)
+                        tmp_list.appendChild(document.getElementById(tmp_id))
+
+                    let div11 = document.createElement("br")
+                    div11.setAttribute("id","br"+tmp_id.slice(-1))
+                    $("#"+tmp_id).after(div11)
+
+                    let div12 = document.createElement("br")
+                    div12.setAttribute("id","br"+tmp_id.slice(-1)+tmp_id.slice(-1))
+                    div11.after(div12)
+
+                    for (i=1;i<7;i++){
+                        let tmp=document.getElementById("blank_"+i.toString())
+                        if ($("#blank_"+i.toString()).children().length==0){
+                            tmp.innerHTML=(i+20).toString()
+                            tmp.style.textAlign="center"
+                        }
+                    }
+                }
+            }
+            function switchTimer(){
+                if (show_time==0){
+                    show_time=1
+                    if (second<=9 && minute<=9){
+                         oDiv.innerHTML="0"+minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (second<=9){
+                        oDiv.innerHTML=minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (minute<=9){
+                        oDiv.innerHTML="0"+minute.toString()+":"+second.toString();
+                    }
+                    else{
+                        oDiv.innerHTML=minute.toString()+":"+second.toString();
+                    }
+                }
+                else{
+                    show_time=0
+                    oDiv.innerHTML="show timer"
+                }
+            }
+            function Pause(){
+                if (pause==0){
+                    pause=1
+                    document.getElementById("pause").innerHTML="Continue"
+                }
+                else{
+                    pause=0
+                    document.getElementById("pause").innerHTML="Pause"
+                }
+            }
+            function showTF(num){
+                document.getElementById("btn"+num.toString()).hidden=true
+                document.getElementById("btn"+num.toString()+"_1").hidden=false
+                document.getElementById("opt"+num.toString()).hidden=false
+            }
+            function hideTF(num){
+                document.getElementById("btn"+num.toString()).hidden=false
+                document.getElementById("btn"+num.toString()+"_1").hidden=true
+                document.getElementById("opt"+num.toString()).hidden=true
+            }
+        </script>
+</head>
+<body>
+<nav style="box-shadow:1px 1px 1px 2px gray;" class="navbar navbar-inverse">
+	  <div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+		  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="#">IELTS Listening</a>
+		</div>
+          <!-- Collect the nav links, forms, and other content for toggling -->
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+			<li onclick="switchTimer()"><a id="timer" style="font-size:25px;width:740px;left:30%;right:70%;text-align:center;" href="#">00:00</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav navbar-right">
+			<li onclick="onSubmit()"><a style="font-size:16px" href="#">Submit</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick=""><a style="font-size:16px" href="/chat">Exit</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick="onSave()"><a id="save" style="font-size:16px" href="#">Save</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick="Pause()"><a id="pause" style="font-size:16px" href="#">Pause</a></li>
+		  </ul>
+			<ul class="nav navbar-nav navbar-right">
+			{% if current_user %}
+				  	<li><a id="current_user" href="javascript:void(0);">{{current_user}}</a></li>
+				  {% endif %}
+		  </ul>
+		</div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
+
+    <center>
+<audio class="audio" src="../static/listening_audio/IELTS15_test1_audio3.mp3" style="border-radius:25px;box-shadow:1px 1px 1px 2px gray;width:50%;" autoplay controls></audio>
+        </center>
+<div style="height:560px;width:100%;font-size:18px;overflow-y:auto;display: inline-block;">
+<div style="padding-left:2%;padding-right:2%;width:100%;white-space:pre-line;font-size:18px;overflow-y:auto;display: inline-block;">
+
+<b>Questions 21–26</b>
+
+What did findings of previous research claim about the personality traits a child is likely to have because of their position in the family?
+Choose <b>SIX answers</b> from the box and write the correct letter, <b>A–H</b>, next to Questions 21–26.
+<div style="width:40%;display: inline-block;">
+    <b>Position in family</b></div> <div style="display: inline-block;"><b>Personality Traits</b></div></div>
+    <div id="answer_area"></div>
+<div style="padding-left:2%;padding-right:2%;width:100%;font-size:18px;overflow-y:auto">
+<div style="vertical-align:top;height:500px;width:40%;white-space:pre-line;display:inline-block">
+    the eldest child <div id="blank_1" style="border:1px solid black;width:240px;height:30px;position:relative;text-align:center;display:inline-block" onclick="console.log(1)" ondrop="drop(event,1);event.cancelBubble = true" ondragover="allowDrop(event)">21</div>
+        <br>a middle child <div id="blank_2" style="border:1px solid black;width:240px;height:30px;position:relative;text-align:center;display:inline-block" onclick="console.log(1)" ondrop="drop(event,1);event.cancelBubble = true" ondragover="allowDrop(event)">22</div>
+    <br>the youngest child <div id="blank_3" style="border:1px solid black;width:240px;height:30px;position:relative;text-align:center;display:inline-block" onclick="console.log(1)" ondrop="drop(event,1);event.cancelBubble = true" ondragover="allowDrop(event)">23</div>
+        <br>a twin <div id="blank_4" style="border:1px solid black;width:240px;height:30px;position:relative;text-align:center;display:inline-block" onclick="console.log(1)" ondrop="drop(event,1);event.cancelBubble = true" ondragover="allowDrop(event)">24</div>
+        <br>an only child  <div id="blank_5" style="border:1px solid black;width:240px;height:30px;position:relative;text-align:center;display:inline-block" onclick="console.log(1)" ondrop="drop(event,1);event.cancelBubble = true" ondragover="allowDrop(event)">25</div>
+		<br>a child with much older siblings  <div id="blank_6" style="border:1px solid black;width:240px;height:30px;position:relative;text-align:center;display:inline-block" onclick="console.log(1)" ondrop="drop(event,1);event.cancelBubble = true" ondragover="allowDrop(event)">26</div>
+<br><br><br><br><br></div>
+    <div id="ans_list" style="vertical-align:top;height:500px;width:58%;display:inline-block" ondrop="drop(event,2)" ondragover="allowDrop(event)" onclick="console.log(2)">
+    <div ondrop="drop(event,3);event.cancelBubble = true" ondragover="return false"></div><br></div></div>
+    <br>
+<div style="padding-left:2%;padding-right:2%;width:100%;white-space:pre-line;font-size:18px;overflow-y:auto;display: inline-block;">
+<b>Questions 27 and 28</b>
+
+Choose the correct letter, <b>A</b>, <b>B</b> or <b>C</b>.
+	27 What do the speakers say about the evidence relating to birth order and academic success?
+	<div id="opt27">
+        <input type="radio" name="option27" value="A"><p id="opt27_1" style="display:inline-block">A.There is conflicting evidence about whether oldest children perform best in intelligence tests.</p>
+        <input type="radio" name="option27" value="B"><p id="opt27_2" style="display:inline-block">B.There is little doubt that birth order has less influence on academic achievement than socio-economic status.</p>
+        <input type="radio" name="option27" value="C"><p id="opt27_3" style="display:inline-block">C.Some studies have neglected to include important factors such as family size.</p>
+    </div>
+    28 What does Ruth think is surprising about the difference in oldest children’s academic performance?
+    <div id="opt28">
+     <input type="radio" name="option28" value="A"><p id="opt28_1" style="display:inline-block">A.It is mainly thanks to their roles as teachers for their younger siblings.</p>
+        <input type="radio" name="option28" value="B"><p id="opt28_2" style="display:inline-block">B.The advantages they have only lead to a slightly higher level of achievement.</p>
+        <input type="radio" name="option28" value="C"><p id="opt28_3" style="display:inline-block">C.The extra parental attention they receive at a young age makes little difference.</p>
+    </div>
+	<b>Questions 29 and 30</b>
+Choose <b>TWO</b> letters, <b>A–E</b>.
+
+	   29 - 30 Which <b>TWO</b> experiences of sibling rivalry do the speakers agree has been valuable for them?
+
+    <input type="checkbox" name="option29" value="A"><p id="opt29_1" style="display:inline-block">A.learning to share</p>
+        <input type="checkbox" name="option29" value="B"><p id="opt29_2" style="display:inline-block">B.learning to stand up for oneself</p>
+        <input type="checkbox" name="option29" value="C"><p id="opt29_3" style="display:inline-block">C.learning to be a good loser</p>
+    <input type="checkbox" name="option29" value="D"><p id="opt29_4" style="display:inline-block">D.learning to be tolerant</p>
+    <input type="checkbox" name="option29" value="E"><p id="opt29_5" style="display:inline-block">E.learning to say sorry</p>
+</div>
+</div>
+</body>
+</html>

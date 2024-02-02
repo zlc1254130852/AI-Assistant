@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Title</title>
+    <style>
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+
+    ::-webkit-scrollbar-track {
+      background-color: #f1f1f1;
+    }
+
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #6698FF;
+    }
+
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #6698FF;
+    }
+    </style>
+    <link rel="stylesheet" href="../static/plugins/bootstrap_v3/css/bootstrap.min.css">
+		<script src="../static/plugins/bootstrap_v3/js/jquery-3.7.1.min.js"></script>
+		<script src="../static/plugins/bootstrap_v3/js/bootstrap.min.js"></script>
+        <script>
+        var show_time=1;
+        var pause=0
+        const choices=['A','B','C','D','E','F','G']
+        const choices_text=["Peter Fleming","Ran Fiennes","Chris Bonington","Robin Hanbury-Tenison","Wilfred Thesiger"]
+        var second;
+        var minute;
+        var oDiv;
+        var answers;
+        var answers_tmp=["-1","-1","-1","-1","-1","-1","-1","-1","-1","-1","-1","-1","-1","-1"]
+        var user=""
+
+        window.onload=function ()
+        {
+            if(document.getElementById("current_user"))
+            	user=document.getElementById("current_user").innerHTML
+            if(user==""){
+            	window.location.href = "/chat"
+				alert("Please log in to proceed");
+				return;
+			}
+            $.ajax({
+					url: "/load",
+					type: "POST",
+					data: {
+					    current_user:user,
+						practice_name: "reading3",
+					},
+					dataType: "json",
+					success: function(response) {
+						if (response.code!=-1)
+						{
+						    for(i=27;i<33;i++){
+                                let rPort = document.getElementsByName("option"+i.toString());
+
+                                for(j=0;j<4;j++)
+                                {
+                                    if(rPort[j].value==response.record_info[i-27]){
+                                        console.log(rPort[j].value);
+                                        rPort[j].checked=true
+                                    }
+
+                                }
+                            }
+                            for (n=0;n<6;n++){
+						        if(response.record_info[n+6]!="-1"){
+						            var data="answer"+choices.indexOf(response.record_info[n+6]).toString()
+
+                                    document.getElementById("blank_"+(n+1).toString()).innerHTML=""
+                                    document.getElementById("blank_"+(n+1).toString()).style.textAlign="left"
+
+
+                                    let div0 = document.createElement("div")
+                                    div0.setAttribute("id","answer"+"_"+"blank_"+(n+1).toString()+"_"+data.slice(-1)+data.slice(-1))
+                                    div0.setAttribute("style","height:30px;background-color:#B4CFEC;z-index:1;display: inline-block;")
+
+                                    div0.innerHTML="&nbsp;&nbsp;"+choices[data.slice(-1)]+". "+choices_text[data.slice(-1)]+"&nbsp;&nbsp;"
+
+                                    div0.style.position="absolute"
+                                    div0.style.top=0
+                                    div0.style.width="100%"
+
+                                    div0.setAttribute("draggable",'true')
+                                    div0.setAttribute("ondragstart","drag(event)")
+                                    div0.setAttribute("ondrop","drop(event,4);event.cancelBubble = true")
+                                    div0.setAttribute("ondragover","allowDrop(event)")
+
+                                    document.getElementById("blank_"+(n+1).toString()).appendChild(div0)
+
+                                    for (i=1;i<6;i++){
+                                        let tmp=document.getElementById("blank_"+i.toString())
+                                        if ($("#blank_"+i.toString()).children().length==0){
+                                            tmp.innerHTML=(i+32).toString()
+                                            tmp.style.textAlign="center"
+                                        }
+                                    }
+						        }
+						    }
+							for(i=38;i<41;i++){
+								if (response.record_info[i-27]!="-1")
+								{
+									document.getElementById("blank"+i.toString()).value=response.record_info[i-27]
+								}
+							}
+						}
+
+					}
+				});
+
+            oDiv=document.getElementById('timer');
+            second=1;
+            minute=0;
+            setInterval(function(){
+                if (pause==0)
+                if (show_time==1){
+                    if (second<=9 && minute<=9){
+                         oDiv.innerHTML="0"+minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (second<=9){
+                        oDiv.innerHTML=minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (minute<=9){
+                        oDiv.innerHTML="0"+minute.toString()+":"+second.toString();
+                    }
+                    else{
+                        oDiv.innerHTML=minute.toString()+":"+second.toString();
+                    }
+                }
+                else{
+                    oDiv.innerHTML="show timer"
+                }
+
+                if (pause==0)
+                    second++;
+
+                if(second==60){
+
+                    second=0;
+                    minute++;
+
+                }
+                if(minute==60){
+                    minute=0;
+                }
+
+            },1000);
+
+            for(i=0;i<5;i++){
+                let div0 = document.createElement("div")
+                div0.setAttribute("id","answer"+i.toString())
+                div0.setAttribute("style","height:30px;background-color:#B4CFEC;z-index:1;display: inline-block;")
+                div0.setAttribute("draggable",'true')
+                div0.setAttribute("ondragstart","drag(event)")
+                div0.setAttribute("ondrop","drop(event,3);event.cancelBubble = true")
+                div0.setAttribute("ondragover","return false")
+                div0.innerHTML="&nbsp;&nbsp;"+choices[i]+". "+choices_text[i]+"&nbsp;&nbsp;"
+
+                let div00 = document.createElement("br")
+                div00.setAttribute("id","br"+i.toString())
+                let div01 = document.createElement("br")
+                div01.setAttribute("id","br"+i.toString()+i.toString())
+
+                document.getElementById("ans_list").appendChild(div0)
+                document.getElementById("ans_list").appendChild(div00)
+                document.getElementById("ans_list").appendChild(div01)
+            }
+
+        };
+            function onSave(){
+                for(i=27;i<33;i++){
+                    let rPort = document.getElementsByName("option"+i.toString());
+
+                    for(j=0;j<4;j++)
+                    {
+                        if(rPort[j].checked){
+                            console.log(rPort[j].value);
+                            answers_tmp[i-27]=rPort[j].value
+                        }
+
+                    }
+                }
+                for (i=1;i<6;i++){
+                    if ($("#blank_"+i.toString()).children().length==1)
+                    {
+                        console.log(choices[parseInt(document.getElementById("blank"+"_"+i.toString()).children[0].id.toString().slice(-1))])
+                        answers_tmp[i+5]=choices[parseInt(document.getElementById("blank"+"_"+i.toString()).children[0].id.toString().slice(-1))]
+                    }
+                }
+				for(i=38;i<41;i++){
+					console.log(document.getElementById("blank"+i.toString()).value)
+					if (document.getElementById("blank"+i.toString()).value.trim()!="")
+					{
+						answers_tmp[i-27]=document.getElementById("blank"+i.toString()).value.trim()
+					}
+				}
+				$.ajax({
+					url: "/save",
+					type: "POST",
+					data: {
+					    current_user:user,
+						practice_name: "reading3",
+						answers_to_save: JSON.stringify(answers_tmp)
+					},
+					dataType: "json",
+					success: function(response) {
+						alert("Answers saved successfully");
+					}
+				});
+			}
+            function onSubmit(){
+                $.ajax({
+                    type: 'GET',
+                    url: '/submit/reading3',
+                    data: {
+                    },
+                    success: function (res) {
+                        console.log(res);
+                        answers=res
+                        for(i=27;i<33;i++){
+                             let rPort = document.getElementsByName("option"+i.toString());
+
+                            for(j=0;j<4;j++)
+                            {
+                                if (rPort[j].value==answers[i-27]){
+                                    document.getElementById("opt"+i.toString()+"_"+(j+1).toString()).style.color="green";
+                                }
+                                else{
+                                    document.getElementById("opt"+i.toString()+"_"+(j+1).toString()).style.color="black";
+                                }
+                                if(rPort[j].checked){
+                                    console.log(rPort[j].value);
+                                    if (rPort[j].value!=answers[i-27])
+                                    {
+                                        document.getElementById("opt"+i.toString()+"_"+(j+1).toString()).style.color="red";
+                                    }
+                                }
+
+                            }
+                        }
+                        document.getElementById("answer_area").style.color="green"
+                        document.getElementById("answer_area").innerHTML="Answers: "
+                        for (i=1;i<6;i++){
+                            if ($("#blank_"+i.toString()).children().length==1)
+                                console.log(choices[parseInt(document.getElementById("blank"+"_"+i.toString()).children[0].id.toString().slice(-1))])
+                            else{
+                                console.log("null")
+                            }
+
+                            document.getElementById("answer_area").innerHTML+=answers[i+5]
+                            if ($("#blank_"+i.toString()).children().length==1)
+                            {
+                                console.log(choices[parseInt(document.getElementById("blank"+"_"+i.toString()).children[0].id.toString().slice(-1))])
+                                if(choices[parseInt(document.getElementById("blank"+"_"+i.toString()).children[0].id.toString().slice(-1))]!=answers[i+5])
+                                {
+                                    document.getElementById("blank"+"_"+i.toString()).children[0].style.color="red"
+                                }
+                                else{
+                                    document.getElementById("blank"+"_"+i.toString()).children[0].style.color="green"
+                                }
+                            }
+                            else{
+                                console.log("null")
+                            }
+                        }
+
+                        for(i=38;i<41;i++){
+                            console.log(document.getElementById("blank"+i.toString()).value)
+                            if (document.getElementById("blank"+i.toString()).value.trim()!=answers[i-27])
+                            {
+                                document.getElementById("blank"+i.toString()).style.color="red"
+                                document.getElementById("answer"+i.toString()).style.color="green"
+                                document.getElementById("answer"+i.toString()).innerHTML=answers[i-27]
+                            }
+                            else{
+                                document.getElementById("blank"+i.toString()).style.color="green"
+                                document.getElementById("answer"+i.toString()).innerHTML=""
+                            }
+                        }
+                    }})
+            }
+            function drag(ev){
+                ev.dataTransfer.setData("text", ev.target.id)
+            }
+            function allowDrop(ev){
+                ev.preventDefault();
+            }
+            function drop(ev,opt){
+
+                if (opt==1){
+                    ev.preventDefault();
+                    var data=ev.dataTransfer.getData("text");
+
+                    ev.target.innerHTML=""
+                    ev.target.style.textAlign="left"
+
+                    let div0 = document.createElement("div")
+                    div0.setAttribute("id","answer"+"_"+ev.target.id+"_"+data.slice(-1)+data.slice(-1))
+                    div0.setAttribute("style","height:30px;background-color:#B4CFEC;z-index:1;display: inline-block;")
+
+                    div0.innerHTML="&nbsp;&nbsp;"+choices[data.slice(-1)]+". "+choices_text[data.slice(-1)]+"&nbsp;&nbsp;"
+
+                    div0.style.position="absolute"
+                    div0.style.top=0
+                    div0.style.width="100%"
+
+                    div0.setAttribute("draggable",'true')
+                    div0.setAttribute("ondragstart","drag(event)")
+                    div0.setAttribute("ondrop","drop(event,4);event.cancelBubble = true")
+                    div0.setAttribute("ondragover","allowDrop(event)")
+
+                    ev.target.appendChild(div0)
+
+                    for (i=1;i<6;i++){
+                        let tmp=document.getElementById("blank_"+i.toString())
+                        if ($("#blank_"+i.toString()).children().length==0){
+                            tmp.innerHTML=(i+32).toString()
+                            tmp.style.textAlign="center"
+                        }
+                    }
+                }
+                else if (opt==2){
+                    console.log("out")
+                    ev.preventDefault();
+                    var data=ev.dataTransfer.getData("text");
+
+                    if(data.length==7)
+                        return
+
+                    document.getElementById(data).remove()
+
+                    for (i=1;i<6;i++){
+                        let tmp=document.getElementById("blank_"+i.toString())
+                        if ($("#blank_"+i.toString()).children().length==0){
+                            tmp.innerHTML=(i+32).toString()
+                            tmp.style.textAlign="center"
+                        }
+                    }
+                }
+                else if (opt==3){
+                    console.log("out")
+                    ev.preventDefault();
+                    var data=ev.dataTransfer.getData("text");
+
+                    let tmp_list = document.getElementById("ans_list")
+
+                    if (data.length>7){
+                        document.getElementById(data).remove()
+                        return
+                    }
+
+                    for(i=0;i<tmp_list.children.length;i++)
+                    {
+                        if(typeof(tmp_list.children[i].getAttribute("id"))=="string")
+                            if (tmp_list.children[i].getAttribute("id")==data)
+                            {
+                                return;
+                            }
+
+                    }
+
+                    if (document.getElementById("br"+data.slice(-1))){
+                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)))
+                    }
+                    if (document.getElementById("br"+data.slice(-1)+data.slice(-1))){
+                        document.getElementById("ans_list").removeChild(document.getElementById("br"+data.slice(-1)+data.slice(-1)))
+                    }
+                    document.getElementById(data).setAttribute("style","height:30px;background-color:#B4CFEC;z-index:1;display: inline-block;")
+
+<!--                    ev.target.appendChild(document.getElementById(data))-->
+
+                    let found_bigger=0
+                    for(i=0;i<tmp_list.children.length;i++)
+                    {
+                        if(typeof(tmp_list.children[i].getAttribute("id"))=="string")
+                            if (tmp_list.children[i].getAttribute("id").slice(0,1)=='a')
+                            {
+                                if (parseInt(tmp_list.children[i].getAttribute("id").slice(-1))>parseInt(data.slice(-1)))
+                                {
+                                    found_bigger=1
+                                    console.log(tmp_list.children[i].getAttribute("id"))
+                                    tmp_list.children[i].before(document.getElementById(data))
+                                    break
+                                }
+                            }
+
+                    }
+                    if (found_bigger==0)
+                        tmp_list.appendChild(document.getElementById(data))
+
+                    let div00 = document.getElementById(data)
+                    div00.setAttribute("draggable",'true')
+                    div00.setAttribute("ondragstart","drag(event)")
+                    div00.setAttribute("ondrop","drop(event,3);event.cancelBubble = true")
+                    div00.setAttribute("ondragover","allowDrop(event)")
+
+                    let div11 = document.createElement("br")
+                    div11.setAttribute("id","br"+data.slice(-1))
+                    $("#"+data).after(div11)
+
+                    let div12 = document.createElement("br")
+                    div12.setAttribute("id","br"+data.slice(-1)+data.slice(-1))
+                    $("#"+data).after(div12)
+
+                    for (i=1;i<6;i++){
+                        let tmp=document.getElementById("blank_"+i.toString())
+                        if ($("#blank_"+i.toString()).children().length==0){
+                            tmp.innerHTML=(i+32).toString()
+                            tmp.style.textAlign="center"
+                        }
+                    }
+                }
+                else if (opt==4){
+                    console.log("inout")
+                    ev.preventDefault();
+                    var data=ev.dataTransfer.getData("text");
+
+                    let div0 = document.createElement("div")
+                    div0.setAttribute("id","answer"+"_"+ev.target.parentNode.id+"_"+data.slice(-1)+data.slice(-1))
+                    div0.setAttribute("style","height:30px;background-color:#B4CFEC;z-index:1;display: inline-block;")
+
+                    div0.innerHTML="&nbsp;&nbsp;"+choices[data.slice(-1)]+". "+choices_text[data.slice(-1)]+"&nbsp;&nbsp;"
+
+                    div0.style.position="absolute"
+                    div0.style.top=0
+                    div0.style.width="100%"
+
+                    div0.setAttribute("draggable",'true')
+                    div0.setAttribute("ondragstart","drag(event)")
+                    div0.setAttribute("ondrop","drop(event,4);event.cancelBubble = true")
+                    div0.setAttribute("ondragover","allowDrop(event)")
+
+                    let tmp_parent = ev.target.parentNode
+                    let tmp_id = ev.target.getAttribute("id")
+
+                    if (tmp_id.slice(-1)==data.slice(-1))
+                    {
+                        return;
+                    }
+
+                    ev.target.setAttribute("draggable",'true')
+                    ev.target.setAttribute("ondragstart","drag(event)")
+                    ev.target.setAttribute("ondrop","drop(event,3);event.cancelBubble = true")
+                    ev.target.setAttribute("ondragover","return false")
+
+                    console.log(tmp_parent)
+
+                    tmp_parent.appendChild(div0)
+                    div0.setAttribute("style","height:30px;width:100%;background-color:#B4CFEC;z-index:1;display: inline-block;")
+
+                    document.getElementById(tmp_id).remove()
+
+                    for (i=1;i<6;i++){
+                        let tmp=document.getElementById("blank_"+i.toString())
+                        if ($("#blank_"+i.toString()).children().length==0){
+                            tmp.innerHTML=(i+32).toString()
+                            tmp.style.textAlign="center"
+                        }
+                    }
+                }
+            }
+            function switchTimer(){
+                if (show_time==0){
+                    show_time=1
+                    if (second<=9 && minute<=9){
+                         oDiv.innerHTML="0"+minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (second<=9){
+                        oDiv.innerHTML=minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (minute<=9){
+                        oDiv.innerHTML="0"+minute.toString()+":"+second.toString();
+                    }
+                    else{
+                        oDiv.innerHTML=minute.toString()+":"+second.toString();
+                    }
+                }
+                else{
+                    show_time=0
+                    oDiv.innerHTML="show timer"
+                }
+            }
+            function Pause(){
+                if (pause==0){
+                    pause=1
+                    document.getElementById("pause").innerHTML="Continue"
+                }
+                else{
+                    pause=0
+                    document.getElementById("pause").innerHTML="Pause"
+                }
+            }
+            function showTF(num){
+                document.getElementById("btn"+num.toString()).hidden=true
+                document.getElementById("btn"+num.toString()+"_1").hidden=false
+                document.getElementById("opt"+num.toString()).hidden=false
+            }
+            function hideTF(num){
+                document.getElementById("btn"+num.toString()).hidden=false
+                document.getElementById("btn"+num.toString()+"_1").hidden=true
+                document.getElementById("opt"+num.toString()).hidden=true
+            }
+        </script>
+</head>
+<body>
+<nav style="box-shadow:1px 1px 1px 2px gray;" class="navbar navbar-inverse">
+	  <div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+		  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="#">IELTS Reading</a>
+		</div>
+          <!-- Collect the nav links, forms, and other content for toggling -->
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+			<li onclick="switchTimer()"><a id="timer" style="font-size:25px;width:740px;left:30%;right:70%;text-align:center;" href="#">00:00</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav navbar-right">
+			<li onclick="onSubmit()"><a style="font-size:16px" href="#">Submit</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick=""><a style="font-size:16px" href="/chat">Exit</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick="onSave()"><a id="save" style="font-size:16px" href="#">Save</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick="Pause()"><a id="pause" style="font-size:16px" href="#">Pause</a></li>
+		  </ul>
+			<ul class="nav navbar-nav navbar-right">
+			{% if current_user %}
+				  	<li><a id="current_user" href="javascript:void(0);">{{current_user}}</a></li>
+				  {% endif %}
+		  </ul>
+		</div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
+
+<div style="width:49%;white-space:pre-line;font-size:18px;overflow-y:auto;height:630px;display: inline-block;">
+<div style="font-size:25px;font-weight:bold" align="center">What is exploration?</div>
+<div style="padding-left:3%;padding-right:2%">We are all explorers. Our desire to discover, and then share that new-found knowledge, is part of what makes us human – indeed, this has played an important part in our success as a species. Long before the first caveman slumped down beside the fire and grunted news that there were plenty of wildebeest over yonder, our ancestors had learnt the value of sending out scouts to investigate the unknown. This questing nature of ours undoubtedly helped our species spread around the globe, just as it nowadays no doubt helps the last nomadic Penan maintain their existence in the depleted forests of Borneo, and a visitor negotiate the subways of New York.
+
+Over the years, we've come to think of explorers as a peculiar breed – different from the rest of us, different from those of us who are merely 'well travelled', even; and perhaps there is a type of person more suited to seeking out the new, a type of caveman more inclined to risk venturing out. That, however, doesn't take away from the fact that we all have this enquiring instinct, even today; and that in all sorts of professions – whether artist, marine biologist or astronomer – borders of the unknown are being tested each day.
+
+Thomas Hardy set some of his novels in Egdon Heath, a fictional area of uncultivated land, and used the landscape to suggest the desires and fears of his characters. He is delving into matters we all recognise because they are common to humanity. This is surely an act of exploration, and into a world as remote as the author chooses. Explorer and travel writer Peter Fleming talks of the moment when the explorer returns to the existence he has left behind with his loved ones. The traveller 'who has for weeks or months seen himself only as a puny and irrelevant alien crawling laboriously over a country in which he has no roots and no background, suddenly encounters his other self, a relatively solid figure, with a place in the minds of certain people'.
+
+In this book about the exploration of the earth's surface, I have confined myself to those whose travels were real and who also aimed at more than personal discovery. But that still left me with another problem: the word 'explorer' has become associated with a past era. We think back to a golden age, as if exploration peaked somehow in the 19th century – as if the process of discovery is now on the decline, though the truth is that we have named only one and a half million of this planet's species, and there may be more than 10 million – and that's not including bacteria. We have studied only 5 per cent of the species we know. We have scarcely mapped the ocean floors, and know even less about ourselves; we fully understand the workings of only 10 per cent of our brains.
+
+Here is how some of today's 'explorers' define the word. Ran Fiennes, dubbed the 'greatest living explorer', said, 'An explorer is someone who has done something that no human has done before – and also done something scientifically useful.' Chris Bonington, a leading mountaineer, felt exploration was to be found in the act of physically touching the unknown: 'You have to have gone somewhere new.' Then Robin Hanbury-Tenison, a campaigner on behalf of remote so-called 'tribal' peoples, said, 'A traveller simply records information about some far-off world, and reports back; but an explorer changes the world.' Wilfred Thesiger, who crossed Arabia's Empty Quarter in 1946, and belongs to an era of unmechanised travel now lost to the rest of us, told me, 'If I'd gone across by camel when I could have gone by car, it would have been a stunt.' To him, exploration meant bringing back information from a remote place regardless of any great self-discovery.
+
+Each definition is slightly different – and tends to reflect the field of endeavour of each pioneer. It was the same whoever I asked: the prominent historian would say exploration was a thing of the past, the cutting-edge scientist would say it was of the present. And so on. They each set their own particular criteria; the common factor in their approach being that they all had, unlike many of us who simply enjoy travel or discovering new things, both a very definite objective from the outset and also a desire to record their findings.
+
+I'd best declare my own bias. As a writer, I'm interested in the exploration of ideas. I've done a great many expeditions and each one was unique. I've lived for months alone with isolated groups of people all around the world, even two 'uncontacted tribes'. But none of these things is of the slightest interest to anyone unless, through my books, I've found a new slant, explored a new idea. Why? Because the world has moved on. The time has long passed for the great continental voyages – another walk to the poles, another crossing of the Empty Quarter. We know how the land surface of our planet lies; exploration of it is now down to the details – the habits of microbes, say, or the grazing behaviour of buffalo. Aside from the deep sea and deep underground, it's the era of specialists. However, this is to disregard the role the human mind has in conveying remote places; and this is what interests me: how a fresh interpretation, even of a well-travelled route, can give its readers new insights.
+</div>
+</div>
+<div style="padding-left:2%;padding-right:2%;width:49%;white-space:pre-line;font-size:18px;overflow-y:auto;height:630px;display: inline-block;">
+<b>Questions 27–32</b>
+
+Choose the correct letter, <b>A</b>, <b>B</b>, <b>C</b> or <b>D</b>.
+
+Write the correct letter in boxes 27–32 on your answer sheet.
+
+    <button type="button" id="btn27" onclick="showTF(27)" style="font-size:18px;text-align:left">27 The writer refers to visitors to New York to illustrate the point that<span class="caret"></span>
+  </button><button type="button" id="btn27_1" onclick="hideTF(27)" hidden="hidden" style="font-size:18px;text-align:left">27 The writer refers to visitors to New York to illustrate the point that
+  </button>
+    <div id="opt27" hidden="hidden">
+     <input type="radio" name="option27" value="A"><p id="opt27_1" style="display:inline-block">A.exploration is an intrinsic element of being human.</p>
+        <input type="radio" name="option27" value="B"><p id="opt27_2" style="display:inline-block">B.most people are enthusiastic about exploring.</p>
+        <input type="radio" name="option27" value="C"><p id="opt27_3" style="display:inline-block">C.exploration can lead to surprising results.</p>
+        <input type="radio" name="option27" value="D"><p id="opt27_4" style="display:inline-block">D.most people find exploration daunting.</p>
+    </div>
+    <button type="button" id="btn28" onclick="showTF(28)" style="font-size:18px;text-align:left">28 According to the second paragraph, what is the writer's view of explorers?<span class="caret"></span>
+  </button><button type="button" id="btn28_1" onclick="hideTF(28)" hidden="hidden" style="font-size:18px;text-align:left">28 According to the second paragraph, what is the writer's view of explorers?
+  </button>
+    <div id="opt28" hidden="hidden">
+     <input type="radio" name="option28" value="A"><p id="opt28_1" style="display:inline-block">A.Their discoveries have brought both benefits and disadvantages.</p>
+        <input type="radio" name="option28" value="B"><p id="opt28_2" style="display:inline-block">B.Their main value is in teaching others.</p>
+        <input type="radio" name="option28" value="C"><p id="opt28_3" style="display:inline-block">C.They act on an urge that is common to everyone.</p>
+        <input type="radio" name="option28" value="D"><p id="opt28_4" style="display:inline-block">D.They tend to be more attracted to certain professions than to others.</p>
+    </div>
+        <button type="button" id="btn29" onclick="showTF(29)" style="font-size:18px;text-align:left">29 The writer refers to a description of Egdon Heath to suggest that<span class="caret"></span>
+  </button><button type="button" id="btn29_1" onclick="hideTF(29)" hidden="hidden" style="font-size:18px;text-align:left">29 The writer refers to a description of Egdon Heath to suggest that
+  </button>
+    <div id="opt29" hidden="hidden">
+     <input type="radio" name="option29" value="A"><p id="opt29_1" style="display:inline-block">A.Hardy was writing about his own experience of exploration.</p>
+        <input type="radio" name="option29" value="B"><p id="opt29_2" style="display:inline-block">B.Hardy was mistaken about the nature of exploration.</p>
+        <input type="radio" name="option29" value="C"><p id="opt29_3" style="display:inline-block">C.Hardy's aim was to investigate people's emotional states.</p>
+        <input type="radio" name="option29" value="D"><p id="opt29_4" style="display:inline-block">D.Hardy's aim was to show the attraction of isolation.</p>
+    </div>
+        <button type="button" id="btn30" onclick="showTF(30)" style="font-size:18px;text-align:left">30 In the fourth paragraph, the writer refers to 'a golden age' to suggest that<span class="caret"></span>
+  </button><button type="button" id="btn30_1" onclick="hideTF(30)" hidden="hidden" style="font-size:18px;text-align:left">30 In the fourth paragraph, the writer refers to 'a golden age' to suggest that
+  </button>
+    <div id="opt30" hidden="hidden">
+     <input type="radio" name="option30" value="A"><p id="opt30_1" style="display:inline-block">A.the amount of useful information produced by exploration has decreased.</p>
+        <input type="radio" name="option30" value="B"><p id="opt30_2" style="display:inline-block">B.fewer people are interested in exploring than in the 19th century.</p>
+        <input type="radio" name="option30" value="C"><p id="opt30_3" style="display:inline-block">C.recent developments have made exploration less exciting.</p>
+        <input type="radio" name="option30" value="D"><p id="opt30_4" style="display:inline-block">D.we are wrong to think that exploration is no longer necessary.</p>
+    </div>
+        <button type="button" id="btn31" onclick="showTF(31)" style="font-size:18px;text-align:left">31 In the sixth paragraph, when discussing the definition of exploration, the writer argues that<span class="caret"></span>
+  </button><button type="button" id="btn31_1" onclick="hideTF(31)" hidden="hidden" style="font-size:18px;text-align:left">31 In the sixth paragraph, when discussing the definition of exploration, the writer argues that
+  </button>
+    <div id="opt31" hidden="hidden">
+     <input type="radio" name="option31" value="A"><p id="opt31_1" style="display:inline-block">A.people tend to relate exploration to their own professional interests.</p>
+        <input type="radio" name="option31" value="B"><p id="opt31_2" style="display:inline-block">B.certain people are likely to misunderstand the nature of exploration.</p>
+        <input type="radio" name="option31" value="C"><p id="opt31_3" style="display:inline-block">C.the generally accepted definition has changed over time.</p>
+        <input type="radio" name="option31" value="D"><p id="opt31_4" style="display:inline-block">D.historians and scientists have more valid definitions than the general public.</p>
+    </div>
+    <button type="button" id="btn32" onclick="showTF(32)" style="font-size:18px;text-align:left">32 In the last paragraph, the writer explains that he is interested in<span class="caret"></span>
+  </button><button type="button" id="btn32_1" onclick="hideTF(32)" hidden="hidden" style="font-size:18px;text-align:left">32 In the last paragraph, the writer explains that he is interested in
+  </button>
+    <div id="opt32" hidden="hidden">
+     <input type="radio" name="option32" value="A"><p id="opt32_1" style="display:inline-block">A.how someone's personality is reflected in their choice of places to visit.</p>
+        <input type="radio" name="option32" value="B"><p id="opt32_2" style="display:inline-block">B.the human ability to cast new light on places that may be familiar.</p>
+        <input type="radio" name="option32" value="C"><p id="opt32_3" style="display:inline-block">C.how travel writing has evolved to meet changing demands.</p>
+        <input type="radio" name="option32" value="D"><p id="opt32_4" style="display:inline-block">D.the feelings that writers develop about the places that they explore.</p>
+    </div>
+
+<b>Questions 33–37</b>
+
+Look at the following statements (Questions 33–37) and the list of explorers below.
+
+Match each statement with the correct explorer, <b>A–E</b>.
+
+Write the correct letter, <b>A–E</b>, in boxes 33–37 on your answer sheet.
+
+<b>NB</b> You may use any letter more than once.<div id="answer_area"></div><div id="ans_list" style="width:680px;height:800px;" ondrop="drop(event,2)" ondragover="allowDrop(event)" onclick="console.log(2)">
+<div id="blank_1" style="border:1px solid black;width:240px;height:30px;position:relative;text-align:center;display:inline-block" onclick="console.log(1)" ondrop="drop(event,1);event.cancelBubble = true" ondragover="allowDrop(event)">33</div> He referred to the relevance of the form of transport used.
+        <br><div id="blank_2" style="border:1px solid black;width:240px;height:30px;position:relative;text-align:center;display:inline-block" onclick="console.log(1)" ondrop="drop(event,1);event.cancelBubble = true" ondragover="allowDrop(event)">34</div> He described feelings on coming back home after a long journey.
+    <br><div id="blank_3" style="border:1px solid black;width:240px;height:30px;position:relative;text-align:center;display:inline-block" onclick="console.log(1)" ondrop="drop(event,1);event.cancelBubble = true" ondragover="allowDrop(event)">35</div> He worked for the benefit of specific groups of people.
+        <br><div id="blank_4" style="border:1px solid black;width:240px;height:30px;position:relative;text-align:center;display:inline-block" onclick="console.log(1)" ondrop="drop(event,1);event.cancelBubble = true" ondragover="allowDrop(event)">36</div> He did not consider learning about oneself an essential part of exploration.
+        <br><div id="blank_5" style="border:1px solid black;width:240px;height:30px;position:relative;text-align:center;display:inline-block" onclick="console.log(1)" ondrop="drop(event,1);event.cancelBubble = true" ondragover="allowDrop(event)">37</div> He defined exploration as being both unique and of value to others.
+        <br><div ondrop="drop(event,3);event.cancelBubble = true" ondragover="return false"><b>List of Explorers</b></div><br></div>
+<b>Questions 38–40</b>
+
+Complete the summary below.
+
+Choose <b>NO MORE THAN TWO WORDS</b>  from the passage for each answer.
+
+Write your answers in boxes 38–40 on your answer sheet.
+
+ <div style="font-size:24px;text-align:center;width:100%"><b>The writer's own bias</b></div>
+    The writer has experience of a large number of <input id="blank38" placeholder="38" onfocus="this.placeholder=''" onblur="this.placeholder='38'" style="width:150px;text-align:center"><p id="answer38" style="display:inline-block"></p>, and was the first stranger that certain previously <input id="blank39" placeholder="39" onfocus="this.placeholder=''" onblur="this.placeholder='39'" style="width:150px;text-align:center"><p id="answer39" style="display:inline-block"></p> people had encountered. He believes there is no need for further exploration of Earth's <input id="blank40" placeholder="40" onfocus="this.placeholder=''" onblur="this.placeholder='40'" style="width:150px;text-align:center"><p id="answer40" style="display:inline-block"></p>, except to answer specific questions such as how buffalo eat.
+
+</div>
+</body>
+</html>

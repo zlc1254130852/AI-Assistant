@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>speaking grader</title>
+	<style>
+		body{
+				background-image: url(../static/AI.jpg);
+			}
+	</style>
+    <link rel="stylesheet" href="../static/plugins/bootstrap_v3/css/bootstrap.min.css">
+		<script src="../static/plugins/bootstrap_v3/js/jquery-3.7.1.min.js"></script>
+		<script src="../static/plugins/bootstrap_v3/js/bootstrap.min.js"></script>
+    <script src="../static/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.min.js"></script>
+    <script src="../static/dist/index.umd.js"></script>
+  <script>
+    var iatWS = io.connect('http://127.0.0.1:5000');
+    const recorder = new RecorderManager("../static/dist");
+    var content=""
+    var chatFrame;
+    var user=""
+
+    iatWS.on('reply3', function(res) {
+    // receiving assessment result
+<!--        console.log(res)-->
+        if (res.user!=user)
+        	return;
+        let obj=JSON.parse(res.result)
+        content+="PronAccuracy: "+obj.PronAccuracy+"\nPronFluency: "+obj.PronFluency+"\n\n"
+        document.getElementById("parent").innerHTML=content
+    });
+    iatWS.on('reply5', function(res) {
+    // receiving speech-to-text result
+    	if (res.user!=user)
+        	return;
+        content+=res.result
+        document.getElementById("parent").innerHTML=content
+        setTimeout(function(){
+			chatFrame.scrollTop = chatFrame.scrollHeight;
+		},0);
+    });
+
+    var fileUploader;
+    var files;
+    window.onload = function () {
+        chatFrame=document.getElementById("parent")
+        if(document.getElementById("current_user"))
+            user=document.getElementById("current_user").innerHTML
+        fileUploader = document.getElementById('file-uploader');
+        fileUploader.addEventListener('change', (event) => {
+        files = event.target.files;
+        console.log('files', files);
+      });
+    }
+    function send_file(){
+    	if(document.getElementById('tag').innerHTML=="Register"){
+			alert("Please log in to proceed");
+			return;
+		}
+        if (!files){
+            alert("Please upload file!")
+            return;
+        }
+        var formData = new FormData();
+        var file = files[0];
+        formData.append('file', file);
+        formData.append('user', user);
+        content=""
+        document.getElementById("parent").innerHTML=""
+        files=""
+        document.getElementById("file-uploader").value=""
+        $.ajax({
+            url: '/file',
+            type: 'POST',
+            cache: false,
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: "json",
+            success: function (res) {
+                console.log(res)
+            },
+            error: function (XmlHttpRequest, textStatus, errorThrown) {},
+            complete: function (res) {
+                console.log(res.responseText)
+                content+=res.responseText
+                document.getElementById("parent").innerHTML=content
+            }
+        });
+    }
+    recorder.onFrameRecorded = ({ isLastFrame, frameBuffer }) => {
+    // send trunked audio data to the server
+
+              iatWS.emit('update3',{current_user: user, data: new Int8Array(frameBuffer)})
+              if (isLastFrame) {
+
+
+              }
+
+          };
+        function play(){
+        // start recording
+			if(document.getElementById('tag').innerHTML=="Register"){
+				alert("Please log in to proceed");
+				return;
+			}
+            document.getElementById('playButton').disabled=true
+            document.getElementById('playButtonArea').hidden=true
+
+            document.getElementById('stopPlayArea').hidden=false
+            document.getElementById('stopPlay').disabled=false
+
+            iatWS.emit('play3',{current_user: user})
+
+            recorder.start({
+                sampleRate: 16000,
+                frameSize: 1280,
+            });
+
+        }
+        function stop_recording(){
+
+            recorder.stop();
+            document.getElementById('stopPlay').disabled=true
+            document.getElementById('stopPlayArea').hidden=true
+
+            document.getElementById('playButtonArea').hidden=false
+            document.getElementById('playButton').disabled=false
+
+            iatWS.emit('update3',{'type':'assess', current_user: user, stop:"stop"})
+            content=""
+            document.getElementById("parent").innerHTML=""
+        }
+
+
+  </script>
+</head>
+<body>
+<nav style="" class="navbar navbar-inverse">
+	  <div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+		  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="#">Assistant</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+		  <ul class="nav navbar-nav">
+			<li><a href="/chat">AI chat</a></li>
+			<li><a href="/translator">translator</a></li>
+			  <li><a href="/voice">real-time translation</a></li>
+			  <li><a href="/chat2">writing grader</a></li>
+			  <li><a href="/assess">oral assessment</a></li>
+			  <li><a href="/video_chat">video chat</a></li>
+			  <li class="active"><a href="/upload">speaking grader<span class="sr-only">(current)</span></a></li>
+			  <li><a href="/text_summary">text summary</a></li>
+			  <li><a href="/upload2">object detection</a></li>
+			  <li class="dropdown">
+			  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">listening<span class="caret"></span></a>
+			  <ul class="dropdown-menu">
+				<li><a href="/listening/1">practice1</a></li>
+				<li><a href="/listening/2">practice2</a></li>
+				<li><a href="/listening/3">practice3</a></li>
+				  <li><a href="/listening/4">practice4</a></li>
+			  </ul>
+			</li>
+			  <li class="dropdown">
+			  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Reading<span class="caret"></span></a>
+			  <ul class="dropdown-menu">
+				<li><a href="/reading/1">practice1</a></li>
+				<li><a href="/reading/2">practice2</a></li>
+				<li><a href="/reading/3">practice3</a></li>
+			  </ul>
+			</li>
+
+		  </ul>
+
+		  <ul class="nav navbar-nav navbar-right">
+			{% if current_user %}
+				  	<li><a id="current_user" href="javascript:void(0);">{{current_user}}</a></li>
+                	<li><a id="tag" href="/logout">Logout</a></li>
+                {% else %}
+					<li><a id="current_user" href="/login">Login</a></li>
+				  	<li><a id="tag" href="/reg">Register</a></li>
+				  {% endif %}
+
+		  </ul>
+		</div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
+<center>
+    <br>
+    <textarea id="parent" style="box-shadow:1px 1px 1px 2px gray;background-color: #F0F0F0;width:480px; border:1px solid #000;
+					border-radius: 10px;
+					height:480px; overflow-y: auto;resize:none"></textarea>
+    <br>
+    <div style="margin-top:10px;">
+        <div style="margin-left:40px;display: inline-block;">
+        <input type="file" id="file-uploader" style="box-shadow:1px 1px 1px 2px gray;background-color: #F0F0F0;border: 1px solid black;border-radius: 10px;width:400px;height:100px;">
+            <br>
+        </div>
+        <div style="margin-left:5px;display: inline-block;">
+        <div id="playButtonArea" style="">
+            <button id="playButton" style="box-shadow:1px 1px 1px 2px gray;" type="button" onclick="play()" class="btn btn-default">
+<!--                <span class="glyphicon glyphicon-play" aria-hidden="true"></span>-->
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-mic" viewBox="0 0 16 16">
+  <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+  <path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"/>
+</svg>
+            </button>
+        </div>
+        <div id="stopPlayArea" hidden="hidden">
+            <button id="stopPlay" style="box-shadow:1px 1px 1px 2px gray;" disabled="true" type="button" onclick="stop_recording()" class="btn btn-default">
+<!--                <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>-->
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-mic-mute" viewBox="0 0 16 16">
+  <path d="M13 8c0 .564-.094 1.107-.266 1.613l-.814-.814A4.02 4.02 0 0 0 12 8V7a.5.5 0 0 1 1 0v1zm-5 4c.818 0 1.578-.245 2.212-.667l.718.719a4.973 4.973 0 0 1-2.43.923V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 1 0v1a4 4 0 0 0 4 4zm3-9v4.879l-1-1V3a2 2 0 0 0-3.997-.118l-.845-.845A3.001 3.001 0 0 1 11 3z"/>
+  <path d="m9.486 10.607-.748-.748A2 2 0 0 1 6 8v-.878l-1-1V8a3 3 0 0 0 4.486 2.607zm-7.84-9.253 12 12 .708-.708-12-12-.708.708z"/>
+</svg>
+            </button>
+        </div>
+        <button id="sendButton" type="button" style="box-shadow:1px 1px 1px 2px gray;" onclick="send_file()" class="btn btn-default">
+									<span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+					</button>
+            <br><br><br>
+        </div>
+	</div>
+</center>
+
+</body>
+</html>

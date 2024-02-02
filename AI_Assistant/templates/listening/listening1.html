@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Title</title>
+    <style>
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+
+    ::-webkit-scrollbar-track {
+      background-color: #f1f1f1;
+    }
+
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #6698FF;
+    }
+
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #6698FF;
+    }
+    </style>
+    <link rel="stylesheet" href="../static/plugins/bootstrap_v3/css/bootstrap.min.css">
+		<script src="../static/plugins/bootstrap_v3/js/jquery-3.7.1.min.js"></script>
+		<script src="../static/plugins/bootstrap_v3/js/bootstrap.min.js"></script>
+        <script>
+        var show_time=1;
+        var pause=0
+<!--        const choices=['A','B','C','D','E','F','G']-->
+		var second;
+        var minute;
+        var oDiv;
+        var answers;
+        var answers_tmp=["-1","-1","-1","-1","-1","-1","-1","-1","-1","-1"]
+        var user=""
+
+        window.onload=function ()
+        {
+        	if(document.getElementById("current_user"))
+            	user=document.getElementById("current_user").innerHTML
+            if(user==""){
+            	window.location.href = "/chat"
+				alert("Please log in to proceed");
+				return;
+			}
+        	$.ajax({
+					url: "/load",
+					type: "POST",
+					data: {
+					    current_user:user,
+						practice_name: "listening1",
+					},
+					dataType: "json",
+					success: function(response) {
+						if (response.code!=-1)
+						{
+							for(i=1;i<11;i++){
+								if (response.record_info[i-1]!="-1")
+								{
+									document.getElementById("blank"+i.toString()).value=response.record_info[i-1]
+								}
+							}
+						}
+
+					}
+				});
+
+            oDiv=document.getElementById('timer');
+            second=1;
+            minute=0;
+            setInterval(function(){
+                if (pause==0)
+                if (show_time==1){
+                    if (second<=9 && minute<=9){
+                         oDiv.innerHTML="0"+minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (second<=9){
+                        oDiv.innerHTML=minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (minute<=9){
+                        oDiv.innerHTML="0"+minute.toString()+":"+second.toString();
+                    }
+                    else{
+                        oDiv.innerHTML=minute.toString()+":"+second.toString();
+                    }
+                }
+                else{
+                    oDiv.innerHTML="show timer"
+                }
+
+                if (pause==0)
+                    second++;
+
+                if(second==60){
+
+                    second=0;
+                    minute++;
+
+                }
+                if(minute==60){
+                    minute=0;
+                }
+
+            },1000);
+
+        };
+<!--            var answers=[null,null,null,null,null]-->
+			function onSave(){
+				for(i=1;i<11;i++){
+					console.log(document.getElementById("blank"+i.toString()).value)
+					if (document.getElementById("blank"+i.toString()).value.trim()!="")
+					{
+						answers_tmp[i-1]=document.getElementById("blank"+i.toString()).value.trim()
+					}
+				}
+				$.ajax({
+					url: "/save",
+					type: "POST",
+					data: {
+					    current_user:user,
+						practice_name: "listening1",
+						answers_to_save: JSON.stringify(answers_tmp)
+					},
+					dataType: "json",
+					success: function(response) {
+						alert("Answers saved successfully");
+					}
+				});
+			}
+            function onSubmit(){
+            	$.ajax({
+                    type: 'GET',
+                    url: '/submit/listening1',
+                    data: {
+                    },
+                    success: function (res) {
+                        console.log(res);
+                        answers=res
+                        for(i=1;i<11;i++){
+							console.log(document.getElementById("blank"+i.toString()).value)
+							if (document.getElementById("blank"+i.toString()).value.trim()!=answers[i-1])
+							{
+								document.getElementById("blank"+i.toString()).style.color="red"
+								document.getElementById("answer"+i.toString()).style.color="green"
+								document.getElementById("answer"+i.toString()).innerHTML=answers[i-1]
+							}
+							else{
+								document.getElementById("blank"+i.toString()).style.color="green"
+								document.getElementById("answer"+i.toString()).innerHTML=""
+							}
+						}
+                    }
+                })
+            }
+            function switchTimer(){
+                if (show_time==0){
+                    show_time=1
+                    if (second<=9 && minute<=9){
+                         oDiv.innerHTML="0"+minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (second<=9){
+                        oDiv.innerHTML=minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (minute<=9){
+                        oDiv.innerHTML="0"+minute.toString()+":"+second.toString();
+                    }
+                    else{
+                        oDiv.innerHTML=minute.toString()+":"+second.toString();
+                    }
+                }
+                else{
+                    show_time=0
+                    oDiv.innerHTML="show timer"
+                }
+            }
+            function Pause(){
+                if (pause==0){
+                    pause=1
+                    document.getElementById("pause").innerHTML="Continue"
+                }
+                else{
+                    pause=0
+                    document.getElementById("pause").innerHTML="Pause"
+                }
+            }
+        </script>
+</head>
+<body>
+<nav style="box-shadow:1px 1px 1px 2px gray;" class="navbar navbar-inverse">
+	  <div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+		  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="#">IELTS Listening</a>
+		</div>
+          <!-- Collect the nav links, forms, and other content for toggling -->
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+			<li onclick="switchTimer()"><a id="timer" style="font-size:25px;width:740px;left:30%;right:70%;text-align:center;" href="#">00:00</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav navbar-right">
+			<li onclick="onSubmit()"><a style="font-size:16px" href="#">Submit</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick=""><a style="font-size:16px" href="/chat">Exit</a></li>
+		  </ul>
+			<ul class="nav navbar-nav navbar-right">
+			<li onclick="onSave()"><a id="save" style="font-size:16px" href="#">Save</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick="Pause()"><a id="pause" style="font-size:16px" href="#">Pause</a></li>
+		  </ul>
+			<ul class="nav navbar-nav navbar-right">
+			{% if current_user %}
+				  	<li><a id="current_user" href="javascript:void(0);">{{current_user}}</a></li>
+				  {% endif %}
+		  </ul>
+		</div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
+
+    <center>
+<audio class="audio" src="../static/listening_audio/IELTS15_test1_audio1.mp3" style="border-radius:25px;box-shadow:1px 1px 1px 2px gray;width:50%;" autoplay controls></audio>
+        </center>
+<div style="padding-left:2%;padding-right:2%;width:100%;white-space:pre-line;font-size:18px;overflow-y:auto;height:560px;display: inline-block;">
+    <b>Questions 1-10</b>
+
+Complete the notes below.
+
+Write <b>ONE WORD AND/OR A NUMBER</b> in each gap.
+
+    <div style="font-size:24px;text-align:center;width:100%"><b>Bankside Recruitment Agency</b></div>
+    •    Address of agency:   497 Eastside, Docklands
+
+	•    Name of agent:   Becky <input id="blank1" placeholder="1" onfocus="this.placeholder=''" onblur="this.placeholder='1'" style="width:150px;text-align:center"><p id="answer1" style="display:inline-block"></p>
+
+
+•    Phone number:   07866 510333
+
+•    Best to call her in the  <input id="blank2" placeholder="2" onfocus="this.placeholder=''" onblur="this.placeholder='2'" style="width:150px;text-align:center"><p id="answer2" style="display:inline-block"></p>
+
+
+Typical jobs
+
+•    Clerical and admin roles, mainly in the finance industry
+
+•    Must have good <input id="blank3" placeholder="3" onfocus="this.placeholder=''" onblur="this.placeholder='3'" style="width:150px;text-align:center"><p id="answer3" style="display:inline-block"></p> skills
+
+•    Jobs are usually for at least one <input id="blank4" placeholder="4" onfocus="this.placeholder=''" onblur="this.placeholder='4'" style="width:150px;text-align:center"><p id="answer4" style="display:inline-block"></p>
+
+
+•    Pay is usually  £ <input id="blank5" placeholder="5" onfocus="this.placeholder=''" onblur="this.placeholder='5'" style="width:150px;text-align:center"><p id="answer5" style="display:inline-block"></p> per hour
+
+Registration process
+
+•    Wear a  <input id="blank6" placeholder="6" onfocus="this.placeholder=''" onblur="this.placeholder='6'" style="width:150px;text-align:center"><p id="answer6" style="display:inline-block"></p> to the interview
+
+•    Must bring your  <input id="blank7" placeholder="7" onfocus="this.placeholder=''" onblur="this.placeholder='7'" style="width:150px;text-align:center"><p id="answer7" style="display:inline-block"></p> to the interview
+
+•    They will ask questions about each applicant’s  <input id="blank8" placeholder="8" onfocus="this.placeholder=''" onblur="this.placeholder='8'" style="width:150px;text-align:center"><p id="answer8" style="display:inline-block"></p>
+
+
+Advantages of using an agency
+
+•    The <input id="blank9" placeholder="9" onfocus="this.placeholder=''" onblur="this.placeholder='9'" style="width:150px;text-align:center"><p id="answer9" style="display:inline-block"></p> you receive at interview will benefit you
+
+•    Will get access to vacancies which are not advertised
+
+•    Less <input id="blank10" placeholder="10" onfocus="this.placeholder=''" onblur="this.placeholder='10'" style="width:150px;text-align:center"><p id="answer10" style="display:inline-block"></p> is involved in applying for jobs
+</div>
+
+</body>
+</html>

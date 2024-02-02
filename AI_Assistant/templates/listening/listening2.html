@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Title</title>
+    <style>
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+
+    ::-webkit-scrollbar-track {
+      background-color: #f1f1f1;
+    }
+
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #6698FF;
+    }
+
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #6698FF;
+    }
+    </style>
+    <link rel="stylesheet" href="../static/plugins/bootstrap_v3/css/bootstrap.min.css">
+		<script src="../static/plugins/bootstrap_v3/js/jquery-3.7.1.min.js"></script>
+		<script src="../static/plugins/bootstrap_v3/js/bootstrap.min.js"></script>
+        <script>
+        var show_time=1;
+        var pause=0
+        const choices=['A','B','C','D','E','F','G']
+        var second;
+        var minute;
+        var oDiv;
+        var answers;
+        var answers_tmp=["-1","-1","-1","-1","-1","-1","-1","-1","-1","-1"]
+        var user=""
+
+        window.onload=function ()
+        {
+            if(document.getElementById("current_user"))
+            	user=document.getElementById("current_user").innerHTML
+            if(user==""){
+            	window.location.href = "/chat"
+				alert("Please log in to proceed");
+				return;
+			}
+        	$.ajax({
+					url: "/load",
+					type: "POST",
+					data: {
+					    current_user:user,
+						practice_name: "listening2",
+					},
+					dataType: "json",
+					success: function(response) {
+						if (response.code!=-1)
+						{
+						    for(i=11;i<15;i++){
+                                let rPort = document.getElementsByName("option"+i.toString());
+
+                                for(j=0;j<3;j++)
+                                {
+                                    if(rPort[j].value==response.record_info[i-11]){
+                                        console.log(rPort[j].value);
+                                        rPort[j].checked=true
+                                    }
+
+                                }
+                            }
+							for(i=15;i<21;i++){
+								if (response.record_info[i-11]!="-1")
+								{
+									document.getElementById("blank"+i.toString()).value=response.record_info[i-11]
+								}
+							}
+						}
+
+					}
+				});
+
+            oDiv=document.getElementById('timer');
+            second=1;
+            minute=0;
+            setInterval(function(){
+                if (pause==0)
+                if (show_time==1){
+                    if (second<=9 && minute<=9){
+                         oDiv.innerHTML="0"+minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (second<=9){
+                        oDiv.innerHTML=minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (minute<=9){
+                        oDiv.innerHTML="0"+minute.toString()+":"+second.toString();
+                    }
+                    else{
+                        oDiv.innerHTML=minute.toString()+":"+second.toString();
+                    }
+                }
+                else{
+                    oDiv.innerHTML="show timer"
+                }
+
+                if (pause==0)
+                    second++;
+
+                if(second==60){
+
+                    second=0;
+                    minute++;
+
+                }
+                if(minute==60){
+                    minute=0;
+                }
+
+            },1000);
+
+        };
+            function onSave(){
+                for(i=11;i<15;i++){
+                    let rPort = document.getElementsByName("option"+i.toString());
+
+                    for(j=0;j<3;j++)
+                    {
+                        if(rPort[j].checked){
+                            console.log(rPort[j].value);
+                            answers_tmp[i-11]=rPort[j].value
+                        }
+
+                    }
+                }
+				for(i=15;i<21;i++){
+					console.log(document.getElementById("blank"+i.toString()).value)
+					if (document.getElementById("blank"+i.toString()).value.trim()!="")
+					{
+						answers_tmp[i-11]=document.getElementById("blank"+i.toString()).value.trim()
+					}
+				}
+				$.ajax({
+					url: "/save",
+					type: "POST",
+					data: {
+					    current_user:user,
+						practice_name: "listening2",
+						answers_to_save: JSON.stringify(answers_tmp)
+					},
+					dataType: "json",
+					success: function(response) {
+						alert("Answers saved successfully");
+					}
+				});
+			}
+            function onSubmit(){
+                $.ajax({
+                    type: 'GET',
+                    url: '/submit/listening2',
+                    data: {
+                    },
+                    success: function (res) {
+                        console.log(res);
+                        answers=res
+                    for(i=11;i<15;i++){
+                         let rPort = document.getElementsByName("option"+i.toString());
+
+                        for(j=0;j<3;j++)
+                        {
+                            if (rPort[j].value==answers[i-11]){
+                                document.getElementById("opt"+i.toString()+"_"+(j+1).toString()).style.color="green";
+                            }
+                            else{
+                                document.getElementById("opt"+i.toString()+"_"+(j+1).toString()).style.color="black";
+                            }
+                            if(rPort[j].checked){
+                                console.log(rPort[j].value);
+                                if (rPort[j].value!=answers[i-11])
+                                {
+                                    document.getElementById("opt"+i.toString()+"_"+(j+1).toString()).style.color="red";
+                                }
+                            }
+
+                        }
+                    }
+                    for(i=15;i<21;i++){
+                        console.log(document.getElementById("blank"+i.toString()).value)
+                        if (document.getElementById("blank"+i.toString()).value.trim()!=answers[i-11])
+                        {
+                            document.getElementById("blank"+i.toString()).style.color="red"
+                            document.getElementById("answer"+i.toString()).style.color="green"
+                            document.getElementById("answer"+i.toString()).innerHTML=answers[i-11]
+                        }
+                        else{
+                            document.getElementById("blank"+i.toString()).style.color="green"
+                            document.getElementById("answer"+i.toString()).innerHTML=""
+                        }
+                    }
+                }})
+            }
+            function switchTimer(){
+                if (show_time==0){
+                    show_time=1
+                    if (second<=9 && minute<=9){
+                         oDiv.innerHTML="0"+minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (second<=9){
+                        oDiv.innerHTML=minute.toString()+":"+"0"+second.toString();
+                    }
+                    else if (minute<=9){
+                        oDiv.innerHTML="0"+minute.toString()+":"+second.toString();
+                    }
+                    else{
+                        oDiv.innerHTML=minute.toString()+":"+second.toString();
+                    }
+                }
+                else{
+                    show_time=0
+                    oDiv.innerHTML="show timer"
+                }
+            }
+            function Pause(){
+                if (pause==0){
+                    pause=1
+                    document.getElementById("pause").innerHTML="Continue"
+                }
+                else{
+                    pause=0
+                    document.getElementById("pause").innerHTML="Pause"
+                }
+            }
+        </script>
+</head>
+<body>
+<nav style="box-shadow:1px 1px 1px 2px gray;" class="navbar navbar-inverse">
+	  <div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+		  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="#">IELTS Listening</a>
+		</div>
+          <!-- Collect the nav links, forms, and other content for toggling -->
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+			<li onclick="switchTimer()"><a id="timer" style="font-size:25px;width:740px;left:30%;right:70%;text-align:center;" href="#">00:00</a></li>
+		  </ul>
+		  <ul class="nav navbar-nav navbar-right">
+			<li onclick="onSubmit()"><a style="font-size:16px" href="#">Submit</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick=""><a style="font-size:16px" href="/chat">Exit</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick="onSave()"><a id="save" style="font-size:16px" href="#">Save</a></li>
+		  </ul>
+            <ul class="nav navbar-nav navbar-right">
+			<li onclick="Pause()"><a id="pause" style="font-size:16px" href="#">Pause</a></li>
+		  </ul>
+			<ul class="nav navbar-nav navbar-right">
+			{% if current_user %}
+				  	<li><a id="current_user" href="javascript:void(0);">{{current_user}}</a></li>
+				  {% endif %}
+		  </ul>
+		</div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
+
+    <center>
+<audio class="audio" src="../static/listening_audio/IELTS15_test1_audio2.mp3" style="border-radius:25px;box-shadow:1px 1px 1px 2px gray;width:50%;" autoplay controls></audio>
+        </center>
+<div style="padding-left:2%;padding-right:2%;width:100%;white-space:pre-line;font-size:18px;overflow-y:auto;height:560px;display: inline-block;">
+<b>Questions 11–14</b>
+
+Choose the correct letter, <b>A</b>, <b>B</b>, <b>C</b> or <b>D</b>.
+
+11 According to the speaker, the company
+    <div id="opt11">
+        <input type="radio" name="option11" value="A"><p id="opt11_1" style="display:inline-block">A.has been in business for longer than most of its competitors.</p>
+        <input type="radio" name="option11" value="B"><p id="opt11_2" style="display:inline-block">B.arranges holidays to more destinations than its competitors.</p>
+        <input type="radio" name="option11" value="C"><p id="opt11_3" style="display:inline-block">C.has more customers than its competitors.</p>
+    </div>
+    12 Where can customers meet the tour manager before travelling to the Isle of Man?
+    <div id="opt12">
+     <input type="radio" name="option12" value="A"><p id="opt12_1" style="display:inline-block">A.Liverpool</p>
+        <input type="radio" name="option12" value="B"><p id="opt12_2" style="display:inline-block">B.Heysham</p>
+        <input type="radio" name="option12" value="C"><p id="opt12_3" style="display:inline-block">C.Luton</p>
+    </div>
+        13 How many lunches are included in the price of the holiday?
+    <div id="opt13">
+     <input type="radio" name="option13" value="A"><p id="opt13_1" style="display:inline-block">A.three</p>
+        <input type="radio" name="option13" value="B"><p id="opt13_2" style="display:inline-block">B.four</p>
+        <input type="radio" name="option13" value="C"><p id="opt13_3" style="display:inline-block">C.five</p>
+    </div>
+        14 Customers have to pay extra for
+    <div id="opt14">
+     <input type="radio" name="option14" value="A"><p id="opt14_1" style="display:inline-block">A.guaranteeing themselves a larger room.</p>
+        <input type="radio" name="option14" value="B"><p id="opt14_2" style="display:inline-block">B.booking at short notice.</p>
+        <input type="radio" name="option14" value="C"><p id="opt14_3" style="display:inline-block">C.transferring to another date.</p>
+    </div>
+<b>Questions 15–20</b>
+
+Complete the table below.
+
+Choose <b>ONE WORD AND/OR A NUMBER</b> for each answer.
+
+ <div style="font-size:24px;text-align:center;width:100%"><b>Timetable for Isle of Man holiday</b></div>
+     <table border="1px;solid black;" style="border-collapse: collapse;">
+         <tr style="background-color:#d0d0d0;text-align:center;">
+            <td></td><td><b>Activity</b></td><td><b>Notes</b></td>
+   <tr>
+         <td>Day 1</td>
+     <td>Arrive</td>
+     <td>Introduction by manager
+
+Hotel dining room has view of the <input id="blank15" placeholder="15" onfocus="this.placeholder=''" onblur="this.placeholder='15'" style="width:100px;text-align:center"><p id="answer15" style="display:inline-block"></p></td>
+   </tr>
+    <tr>
+        <td>Day 2</td>
+     <td>Tynwald Exhibition and Peel</td>
+     <td>Tynwald Exhibition and Peel    Tynwald may have been founded in <input id="blank16" placeholder="16" onfocus="this.placeholder=''" onblur="this.placeholder='16'" style="width:100px;text-align:center"><p id="answer16" style="display:inline-block"></p> not 979.</td>
+     </tr>
+   <tr>
+       <td>Day 3</td>
+      <td>Trip to Snaefell</td>
+     <td>Travel along promenade in a tram; train to Laxey; train to the <input id="blank17" placeholder="17"
+                                                                                                             onfocus="this.placeholder=''"
+                                                                                                             onblur="this.placeholder='17'"
+                                                                                                             style="width:100px;text-align:center"><p id="answer17" style="display:inline-block"></p> of Snaefell.</td>
+    </tr>
+        <tr>
+            <td>Day 4</td>
+      <td>Free day</td>
+     <td>Company provides a <input id="blank18" placeholder="18" onfocus="this.placeholder=''" onblur="this.placeholder='18'" style="width:150px;text-align:center"><p id="answer18" style="display:inline-block"></p> for local transport and heritage sites.</td>
+    </tr>
+         <tr>
+            <td>Day 5</td>
+      <td>Take the  <input id="blank19" placeholder="19" onfocus="this.placeholder=''" onblur="this.placeholder='19'" style="width:150px;text-align:center"><p id="answer19" style="display:inline-block"></p> railway train from Douglas to Port Erin</td>
+     <td>Free time, then coach to Castletown – former <input id="blank20" placeholder="20" onfocus="this.placeholder=''" onblur="this.placeholder='20'" style="width:150px;text-align:center"><p id="answer20" style="display:inline-block"></p> has old castle.</td>
+    </tr>
+         <tr>
+            <td>Day 6</td>
+      <td>Leave</td>
+     <td>Leave the island by ferry or plane</td>
+    </tr>
+</table>
+
+</div>
+</body>
+</html>
