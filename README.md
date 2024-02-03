@@ -6,6 +6,7 @@ Text-translator Page
 Real-time Translation Page 
 (Click on microphone icon to start, close it before exiting the page or jumping to another page)
 ![33a697bebe264c46070dcf3358f5cf8](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/d03e1efe-3418-4466-a5d4-92fd42e11cf1)
+IELTS Writing Grader (Input format: "Topic: Text of the topic \n Answer: Text of the answer")
 ![8e4271c7cb14d28747afa212cf8e2ca](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/bb496b9f-9abf-4324-95f0-f8d2e1df83ef)
 ![07fa791896fe0336ff221b15a6a9ef2](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/7db40ff8-cacf-4b2b-bae8-0bd6a6abdd45)
 ![a28bbd5d8cbc38e33c36ee4d8cae160](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/a36f00ec-0e9c-497c-9268-ba050b3fb6e5)
