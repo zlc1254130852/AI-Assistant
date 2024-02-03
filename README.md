@@ -1,3 +1,4 @@
+AI-chat Page (Left-click the message to do text-to-speech, right-click to delete the message. Click on microphone icon to start recording for speech-to-text)
 ![19a679dad5ed6c4461c1eae865c8298](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/7e5206a9-dc2e-49fb-b57f-995bad78b532)
 ![07533f5deba29ea9064bd9224505efa](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/2789a5ec-77d2-4eb8-b20e-15c552f7df97)
 ![33a697bebe264c46070dcf3358f5cf8](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/d03e1efe-3418-4466-a5d4-92fd42e11cf1)
