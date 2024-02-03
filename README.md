@@ -6,14 +6,27 @@ Text-translator Page
 Real-time Translation Page 
 (Click on microphone icon to start, close it before exiting the page or jumping to another page)
 ![33a697bebe264c46070dcf3358f5cf8](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/d03e1efe-3418-4466-a5d4-92fd42e11cf1)
-IELTS Writing Grader (Input format: "Topic: Text of the topic \n Answer: Text of the answer")
+IELTS Writing Grader Page
+(Input format: "Topic: Text of the topic Answer: Text of the answer")
 ![8e4271c7cb14d28747afa212cf8e2ca](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/bb496b9f-9abf-4324-95f0-f8d2e1df83ef)
+Oral Assessment Page 
+(Enter the script to be assessed in the top frame, click on microphone icon to start recording, result will show in the bottom frame)
 ![07fa791896fe0336ff221b15a6a9ef2](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/7db40ff8-cacf-4b2b-bae8-0bd6a6abdd45)
+Video-chat Page 
+(Enter the question or click on the microphone icon to start recording voice message to interact with the avatar)
 ![a28bbd5d8cbc38e33c36ee4d8cae160](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/a36f00ec-0e9c-497c-9268-ba050b3fb6e5)
+IELTS Speaking Grader Page
+(No script needed, record or send audio file to see the result)
 ![7944390638a167dad132815f8a42f67](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/c1d9f69f-6935-4539-acd4-f18d829f9077)
+Text Summary Page
+(Enter the text or send pdf/docx/txt file to procceed)
 ![9e7421287d61c60598700389f26c148](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/4c93da21-27e2-4dbb-b833-2df4041e7def)
+Object Detection Page
+(Drag and drop an image to the bottom area, send to see the English name and corresponding translation of things on the image)
 ![56ee8199c26a063d0d0530d7d0dc837](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/2bc7f341-68f9-4640-a827-59c42cbe12d8)
+IELTS Listening Practice Page
 ![4b8c5dedf6bdbe470d82b70cc473816](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/4c46e708-a080-4e8c-92ba-4789b6f9a427)
+IELTS Reading Practice Page
 ![bf207b0731a3e6b69ce6a9626827864](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/ecadb1b5-9bd2-4f09-baf7-4476b2a48780)
 
 
