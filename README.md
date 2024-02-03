@@ -1,7 +1,9 @@
 AI-chat Page 
-(Left-click the message to do text-to-speech, right-click to delete the message. Click on microphone icon to start recording for speech-to-text)
+(Left-click the message to do text-to-speech, right-click to delete the message. Click on microphone icon to start recording for speech-to-text, start speaking when the microphone on your device is ready.)
 ![19a679dad5ed6c4461c1eae865c8298](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/7e5206a9-dc2e-49fb-b57f-995bad78b532)
+Text-translator Page
 ![07533f5deba29ea9064bd9224505efa](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/2789a5ec-77d2-4eb8-b20e-15c552f7df97)
+Real-time Translation Page (Click on microphone icon to start, )
 ![33a697bebe264c46070dcf3358f5cf8](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/d03e1efe-3418-4466-a5d4-92fd42e11cf1)
 ![8e4271c7cb14d28747afa212cf8e2ca](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/bb496b9f-9abf-4324-95f0-f8d2e1df83ef)
 ![07fa791896fe0336ff221b15a6a9ef2](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/7db40ff8-cacf-4b2b-bae8-0bd6a6abdd45)
