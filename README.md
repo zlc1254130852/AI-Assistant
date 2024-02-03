@@ -1,4 +1,5 @@
 https://aiassistantuo.online:7406/login (username: 111, pwd: 111)
+
 AI-chat Page 
 (Left-click the message to do text-to-speech, right-click to delete the message. Click on microphone icon to start recording for speech-to-text, start speaking when the microphone on your device is ready.)
 ![19a679dad5ed6c4461c1eae865c8298](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/7e5206a9-dc2e-49fb-b57f-995bad78b532)
