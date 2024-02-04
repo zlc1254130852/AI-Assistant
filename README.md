@@ -15,7 +15,7 @@ Real-time Translation Page (voice.html)
 
 IELTS Writing Grader Page (chat2.html)
 
-(Input format: "Topic: Text of the topic Answer: Text of the answer")
+(Input format: "Topic: Text of the topic \n Answer: Text of the answer")
 ![8e4271c7cb14d28747afa212cf8e2ca](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/bb496b9f-9abf-4324-95f0-f8d2e1df83ef)
 
 Oral Assessment Page (assess.html)
