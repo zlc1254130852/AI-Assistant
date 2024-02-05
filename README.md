@@ -2,15 +2,17 @@ https://aiassistantuo.online:7406/login (username: 111, pwd: 111)
 
 AI-chat Page (chat.html)
 
-(Left-click the message to do text-to-speech, right-click to delete the message. Click on microphone icon to start recording for speech-to-text, start speaking when the microphone on your device is ready.)
+(Enter and send the message to interact with the AI-assistant. Left-click the message to do text-to-speech, right-click to delete the message. Click on microphone icon to start recording for speech-to-text, start speaking when the microphone on your device is ready.)
 ![19a679dad5ed6c4461c1eae865c8298](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/7e5206a9-dc2e-49fb-b57f-995bad78b532)
 
 Text-translator Page (translator.html)
+
+(Choose your target language and send English message to the assistant to translate it into the target language.)
 ![07533f5deba29ea9064bd9224505efa](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/2789a5ec-77d2-4eb8-b20e-15c552f7df97)
 
 Real-time Translation Page (voice.html)
 
-(Click on microphone icon to start, close it before exiting the page or jumping to another page)
+(Currently only support English as source language, can be used for real-time translation in a seminar or meeting. Choose your target language, click on microphone icon to start, close it before exiting the page or jumping to another page.)
 ![33a697bebe264c46070dcf3358f5cf8](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/d03e1efe-3418-4466-a5d4-92fd42e11cf1)
 
 IELTS Writing Grader Page (chat2.html)
