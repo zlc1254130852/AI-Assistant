@@ -22,7 +22,7 @@ IELTS Writing Grader Page (chat2.html)
 
 Oral Assessment Page (assess.html)
 
-(Enter the script to be assessed in the top frame, click on microphone icon to start recording, result will show in the bottom frame)
+(Enter the script to be assessed in the top frame, can be one or more sentences. Click on microphone icon to start recording, scores will show in the bottom frame)
 ![07fa791896fe0336ff221b15a6a9ef2](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/7db40ff8-cacf-4b2b-bae8-0bd6a6abdd45)
 
 Video-chat Page (video.html)
@@ -32,17 +32,17 @@ Video-chat Page (video.html)
 
 IELTS Speaking Grader Page (upload.html)
 
-(No script needed, record or send audio file to see the result)
+(No script needed, record or send audio file to see the assessment result)
 ![7944390638a167dad132815f8a42f67](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/c1d9f69f-6935-4539-acd4-f18d829f9077)
 
 Text Summary Page (text_summary.html)
 
-(Enter the text or send pdf/docx/txt file to procceed)
+(Enter the text or send pdf/docx/txt file to see text summary and key points)
 ![9e7421287d61c60598700389f26c148](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/4c93da21-27e2-4dbb-b833-2df4041e7def)
 
 Object Detection Page (upload.html)
 
-(Drag and drop an image to the bottom area, send to see the English name and corresponding translation of things on the image)
+(Drag and drop an image to the bottom area, send to see the English word and corresponding translation of things on the image)
 ![56ee8199c26a063d0d0530d7d0dc837](https://github.com/zlc1254130852/AI-Assistant/assets/118621914/2bc7f341-68f9-4640-a827-59c42cbe12d8)
 
 IELTS Listening Practice Page
